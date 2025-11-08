@@ -32,6 +32,40 @@ export function SettingsModal({
 
         <div className="space-y-6">
           <div className="space-y-3">
+            <Label className="text-lg font-semibold">Game Mode</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => onUpdateSettings({ gameMode: "solo" })}
+                className={`
+                  p-4 rounded-xl border-2 font-semibold transition-all
+                  hover-elevate active-elevate-2
+                  ${settings.gameMode === "solo"
+                    ? "border-primary bg-primary text-primary-foreground" 
+                    : "border-border bg-card text-foreground"
+                  }
+                `}
+                data-testid="button-mode-solo"
+              >
+                Solo
+              </button>
+              <button
+                onClick={() => onUpdateSettings({ gameMode: "team" })}
+                className={`
+                  p-4 rounded-xl border-2 font-semibold transition-all
+                  hover-elevate active-elevate-2
+                  ${settings.gameMode === "team"
+                    ? "border-primary bg-primary text-primary-foreground" 
+                    : "border-border bg-card text-foreground"
+                  }
+                `}
+                data-testid="button-mode-team"
+              >
+                Team
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
             <Label className="text-lg font-semibold">Timer Length</Label>
             <div className="grid grid-cols-3 gap-3">
               {(["30", "60", "90"] as const).map((time) => (

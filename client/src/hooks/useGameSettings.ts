@@ -6,6 +6,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   timerLength: "60",
   selectedCategories: categories.map((c) => c.id),
   soundEnabled: true,
+  gameMode: "solo",
 };
 
 export function useGameSettings() {

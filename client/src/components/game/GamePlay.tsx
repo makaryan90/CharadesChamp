@@ -14,10 +14,11 @@ interface GamePlayProps {
   onCorrect: () => void;
   onSkip: () => void;
   onPause: () => void;
+  onNextTeam?: () => void;
   isPaused?: boolean;
 }
 
-export function GamePlay({ gameState, onCorrect, onSkip, onPause, isPaused = false }: GamePlayProps) {
+export function GamePlay({ gameState, onCorrect, onSkip, onPause, onNextTeam, isPaused = false }: GamePlayProps) {
   const [showWord, setShowWord] = useState(true);
   const category = categories.find((c) => c.id === gameState.currentCategory);
 
@@ -32,6 +33,22 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, isPaused = fal
       setTimeout(() => setShowWord(true), 50);
     }
   }, [gameState.currentWord, isPaused]);
+
+  const currentTeam = gameState.teams && gameState.teams.length > 0 
+    ? gameState.teams[gameState.currentTeamIndex || 0] 
+    : null;
+
+  const getTeamColorClasses = (color: string) => {
+    const colorMap: Record<string, { bg: string, border: string, dot: string }> = {
+      purple: { bg: "bg-purple-500/20", border: "border-purple-500", dot: "bg-purple-500" },
+      cyan: { bg: "bg-cyan-500/20", border: "border-cyan-500", dot: "bg-cyan-500" },
+      orange: { bg: "bg-orange-500/20", border: "border-orange-500", dot: "bg-orange-500" },
+      green: { bg: "bg-green-500/20", border: "border-green-500", dot: "bg-green-500" },
+      pink: { bg: "bg-pink-500/20", border: "border-pink-500", dot: "bg-pink-500" },
+      yellow: { bg: "bg-yellow-500/20", border: "border-yellow-500", dot: "bg-yellow-500" },
+    };
+    return colorMap[color] || colorMap.purple;
+  };
 
   return (
     <div className="min-h-screen flex flex-col p-6 md:p-8">
@@ -52,6 +69,20 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, isPaused = fal
 
         <ScoreDisplay score={gameState.score} />
       </div>
+
+      {gameState.gameMode === "team" && currentTeam && (
+        <div className="mb-6 text-center">
+          <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full ${getTeamColorClasses(currentTeam.color).bg} border-2 ${getTeamColorClasses(currentTeam.color).border}`}>
+            <div className={`w-3 h-3 rounded-full ${getTeamColorClasses(currentTeam.color).dot}`} />
+            <span className="font-bold text-lg" data-testid="text-current-team">
+              {currentTeam.name}'s Turn
+            </span>
+            <Badge variant="secondary" className="ml-2">
+              {currentTeam.score} points
+            </Badge>
+          </div>
+        </div>
+      )}
 
       {isPaused ? (
         <div className="flex-1 flex items-center justify-center">
@@ -113,6 +144,19 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, isPaused = fal
               <ChevronRight className="h-6 w-6 mr-2" />
               Skip
             </Button>
+
+            {gameState.gameMode === "team" && onNextTeam && gameState.teams && gameState.teams.length > 1 && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full max-w-md mx-auto h-16 text-xl font-semibold rounded-full mt-4"
+                onClick={onNextTeam}
+                data-testid="button-next-team"
+              >
+                <ChevronRight className="h-6 w-6 mr-2" />
+                Pass to Next Team
+              </Button>
+            )}
 
             <p className="text-center text-sm text-muted-foreground mt-2">
               Tip: Swipe up to skip, swipe right for correct

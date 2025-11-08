@@ -10,6 +10,9 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     currentCategory: null,
     timeRemaining: parseInt(settings.timerLength),
     wordsGuessed: [],
+    gameMode: settings.gameMode || "solo",
+    teams: [],
+    currentTeamIndex: 0,
   });
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -78,7 +81,23 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     }
   };
 
-  const startGame = () => {
+  const startGame = (teams?: Array<{ name: string; score: number; color: string }>) => {
+    const gameMode = settings.gameMode || "solo";
+    setGameState({
+      status: gameMode === "team" ? "team-setup" : "category-select",
+      score: 0,
+      currentWord: null,
+      currentCategory: null,
+      timeRemaining: parseInt(settings.timerLength),
+      wordsGuessed: [],
+      gameMode,
+      teams: teams || [],
+      currentTeamIndex: 0,
+    });
+    usedWordsRef.current.clear();
+  };
+
+  const startWithTeams = (teams: Array<{ name: string; score: number; color: string }>) => {
     setGameState({
       status: "category-select",
       score: 0,
@@ -86,6 +105,9 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
       currentCategory: null,
       timeRemaining: parseInt(settings.timerLength),
       wordsGuessed: [],
+      gameMode: "team",
+      teams,
+      currentTeamIndex: 0,
     });
     usedWordsRef.current.clear();
   };
@@ -114,13 +136,45 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     const wordData = getRandomWord();
     if (!wordData) return;
 
-    setGameState((prev) => ({
-      ...prev,
-      score: prev.score + 1,
-      currentWord: wordData.word,
-      currentCategory: wordData.categoryId,
-      wordsGuessed: [...prev.wordsGuessed, prev.currentWord || ""],
-    }));
+    setGameState((prev) => {
+      if (prev.gameMode === "team" && prev.teams && prev.teams.length > 0) {
+        const updatedTeams = [...prev.teams];
+        const currentIndex = prev.currentTeamIndex || 0;
+        updatedTeams[currentIndex] = {
+          ...updatedTeams[currentIndex],
+          score: updatedTeams[currentIndex].score + 1,
+        };
+        
+        return {
+          ...prev,
+          teams: updatedTeams,
+          score: prev.score + 1,
+          currentWord: wordData.word,
+          currentCategory: wordData.categoryId,
+          wordsGuessed: [...prev.wordsGuessed, prev.currentWord || ""],
+        };
+      }
+      
+      return {
+        ...prev,
+        score: prev.score + 1,
+        currentWord: wordData.word,
+        currentCategory: wordData.categoryId,
+        wordsGuessed: [...prev.wordsGuessed, prev.currentWord || ""],
+      };
+    });
+  };
+
+  const nextTeam = () => {
+    setGameState((prev) => {
+      if (!prev.teams || prev.teams.length === 0) return prev;
+      
+      const nextIndex = ((prev.currentTeamIndex || 0) + 1) % prev.teams.length;
+      return {
+        ...prev,
+        currentTeamIndex: nextIndex,
+      };
+    });
   };
 
   const pauseGame = () => {
@@ -148,6 +202,9 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
       currentCategory: null,
       timeRemaining: parseInt(settings.timerLength),
       wordsGuessed: [],
+      gameMode: settings.gameMode || "solo",
+      teams: [],
+      currentTeamIndex: 0,
     });
   };
 
@@ -160,11 +217,13 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
   return {
     gameState,
     startGame,
+    startWithTeams,
     nextWord,
     correctGuess,
     pauseGame,
     resumeGame,
     endGame,
     resetGame,
+    nextTeam,
   };
 }
