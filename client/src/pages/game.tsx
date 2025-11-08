@@ -21,7 +21,7 @@ export default function Game() {
     resumeGame,
     endGame,
     resetGame,
-  } = useGameState(settings, playSound);
+  } = useGameState(settings, (sound: string) => playSound(sound as any));
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
