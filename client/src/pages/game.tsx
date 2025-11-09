@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { MainMenu } from "@/components/game/MainMenu";
 import { QuickStart } from "@/components/game/QuickStart";
 import { HowToPlay } from "@/components/game/HowToPlay";
+import { SubscriptionModal } from "@/components/game/SubscriptionModal";
 import { WelcomeScreen } from "@/components/game/WelcomeScreen";
 import { CategorySelect } from "@/components/game/CategorySelect";
 import { GamePlay } from "@/components/game/GamePlay";
@@ -18,6 +19,7 @@ type NavigationScreen = "main-menu" | "quick-start" | "how-to-play" | "subscribe
 export default function Game() {
   const [navigationScreen, setNavigationScreen] = useState<NavigationScreen | null>("main-menu");
   const [showSettings, setShowSettings] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [gameSaved, setGameSaved] = useState(false);
   const [isPremium, setIsPremium] = useState(() => {
     return localStorage.getItem("charades-premium") === "true";
@@ -87,6 +89,15 @@ export default function Game() {
     resetGame();
   };
 
+  const handleUnlockPremium = () => {
+    setIsPremium(true);
+    localStorage.setItem("charades-premium", "true");
+    setShowSubscriptionModal(false);
+    if (navigationScreen === "subscribe") {
+      setNavigationScreen("main-menu");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-hidden">
       {navigationScreen === "main-menu" && (
@@ -108,6 +119,7 @@ export default function Game() {
         <QuickStart
           onBack={() => setNavigationScreen("main-menu")}
           onStartGame={handleQuickStartGame}
+          onOpenSubscription={() => setShowSubscriptionModal(true)}
           isPremium={isPremium}
         />
       )}
@@ -168,6 +180,8 @@ export default function Game() {
           }}
           onStartPlaying={nextWord}
           onBack={handleBackToMainMenu}
+          onOpenSubscription={() => setShowSubscriptionModal(true)}
+          isPremium={isPremium}
         />
       )}
 
@@ -239,6 +253,15 @@ export default function Game() {
         onClose={() => setShowSettings(false)}
         settings={settings}
         onUpdateSettings={updateSettings}
+      />
+
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        onUnlock={handleUnlockPremium}
+        onRegister={() => {
+          alert("Registration page coming soon! For now, click 'Unlock Now' to simulate premium unlock.");
+        }}
       />
     </div>
   );

@@ -1,28 +1,52 @@
 import { type Category } from "@shared/schema";
-import { Check } from "lucide-react";
+import { Check, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { getIcon } from "@/lib/iconMap";
 
 interface CategoryCardProps {
   category: Category;
   isSelected: boolean;
   onToggle: () => void;
+  isLocked?: boolean;
+  onLockedClick?: () => void;
 }
 
-export function CategoryCard({ category, isSelected, onToggle }: CategoryCardProps) {
+export function CategoryCard({ 
+  category, 
+  isSelected, 
+  onToggle, 
+  isLocked = false,
+  onLockedClick 
+}: CategoryCardProps) {
+  const handleClick = () => {
+    if (isLocked && onLockedClick) {
+      onLockedClick();
+    } else {
+      onToggle();
+    }
+  };
+
   return (
     <button
-      onClick={onToggle}
+      onClick={handleClick}
       className={`
         relative p-6 rounded-2xl border-2 transition-all
-        hover-elevate active-elevate-2
+        ${isLocked ? 'opacity-75' : 'hover-elevate active-elevate-2'}
         ${isSelected 
           ? "border-primary bg-primary/10 scale-105" 
           : "border-border bg-card"
         }
+        ${isLocked ? 'cursor-pointer' : ''}
       `}
-      data-testid={`category-${category.id}`}
+      data-testid={`category-${isLocked ? 'locked-' : ''}${category.id}`}
     >
-      {isSelected && (
+      {isLocked && (
+        <div className="absolute top-2 right-2 w-8 h-8 bg-accent rounded-full flex items-center justify-center shadow-lg">
+          <Lock className="h-4 w-4 text-accent-foreground" />
+        </div>
+      )}
+
+      {!isLocked && isSelected && (
         <div className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
           <Check className="h-4 w-4 text-primary-foreground" />
         </div>
@@ -38,6 +62,9 @@ export function CategoryCard({ category, isSelected, onToggle }: CategoryCardPro
         <span className="text-sm text-muted-foreground">
           {category.words.length} words
         </span>
+        {isLocked && (
+          <Badge variant="outline" className="text-xs">Premium</Badge>
+        )}
       </div>
     </button>
   );

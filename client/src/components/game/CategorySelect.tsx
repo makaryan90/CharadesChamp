@@ -8,13 +8,19 @@ interface CategorySelectProps {
   onCategoryToggle: (categoryId: string) => void;
   onStartPlaying: () => void;
   onBack: () => void;
+  onOpenSubscription?: () => void;
+  isPremium?: boolean;
 }
+
+const FREE_CATEGORY_LIMIT = 5;
 
 export function CategorySelect({
   selectedCategories,
   onCategoryToggle,
   onStartPlaying,
   onBack,
+  onOpenSubscription,
+  isPremium = false,
 }: CategorySelectProps) {
   const canStart = selectedCategories.length > 0;
 
@@ -37,14 +43,19 @@ export function CategorySelect({
 
       <div className="flex-1 max-w-4xl w-full mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-          {categories.map((category) => (
-            <CategoryCard
-              key={category.id}
-              category={category}
-              isSelected={selectedCategories.includes(category.id)}
-              onToggle={() => onCategoryToggle(category.id)}
-            />
-          ))}
+          {categories.map((category, index) => {
+            const isLocked = !isPremium && index >= FREE_CATEGORY_LIMIT;
+            return (
+              <CategoryCard
+                key={category.id}
+                category={category}
+                isSelected={selectedCategories.includes(category.id)}
+                onToggle={() => onCategoryToggle(category.id)}
+                isLocked={isLocked}
+                onLockedClick={onOpenSubscription}
+              />
+            );
+          })}
         </div>
       </div>
 

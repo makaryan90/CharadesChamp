@@ -9,12 +9,13 @@ import { useState } from "react";
 interface QuickStartProps {
   onBack: () => void;
   onStartGame: (selectedCategories: string[], timerLength: string) => void;
+  onOpenSubscription?: () => void;
   isPremium?: boolean;
 }
 
 const FREE_CATEGORY_LIMIT = 5;
 
-export function QuickStart({ onBack, onStartGame, isPremium = false }: QuickStartProps) {
+export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium = false }: QuickStartProps) {
   const freeCategories = categories.slice(0, FREE_CATEGORY_LIMIT);
   const premiumCategories = categories.slice(FREE_CATEGORY_LIMIT);
   
@@ -81,8 +82,9 @@ export function QuickStart({ onBack, onStartGame, isPremium = false }: QuickStar
             {premiumCategories.slice(0, 6).map((category) => (
               <Card
                 key={category.id}
-                className="p-4 opacity-60 cursor-not-allowed relative overflow-hidden"
+                className="p-4 opacity-60 cursor-pointer relative overflow-hidden hover-elevate"
                 data-testid={`category-locked-${category.id}`}
+                onClick={onOpenSubscription}
               >
                 <div className="absolute inset-0 bg-card/80 backdrop-blur-[2px] flex items-center justify-center">
                   <Lock className="h-8 w-8 text-muted-foreground" />
