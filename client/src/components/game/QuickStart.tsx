@@ -16,11 +16,11 @@ interface QuickStartProps {
 const FREE_CATEGORY_LIMIT = 5;
 
 export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium = false }: QuickStartProps) {
-  const freeCategories = categories.slice(0, FREE_CATEGORY_LIMIT);
-  const premiumCategories = categories.slice(FREE_CATEGORY_LIMIT);
+  const freeCategories = isPremium ? categories : categories.slice(0, FREE_CATEGORY_LIMIT);
+  const premiumCategories = isPremium ? [] : categories.slice(FREE_CATEGORY_LIMIT);
   
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    freeCategories.slice(0, 2).map(c => c.id)
+    categories.slice(0, 2).map(c => c.id)
   );
   const [timerLength, setTimerLength] = useState<string>("60");
 
@@ -73,7 +73,7 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
                       {getIcon(category.icon, "h-10 w-10")}
                     </div>
                     <span className="text-sm font-semibold">{category.name}</span>
-                    <Badge variant="secondary" className="text-xs">Free</Badge>
+                    {!isPremium && <Badge variant="secondary" className="text-xs">Free</Badge>}
                   </div>
                 </Card>
               );
