@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pause, Play, ChevronRight, Check } from "lucide-react";
+import { Pause, Play, ChevronRight, Check, X } from "lucide-react";
 import { type GameState } from "@shared/schema";
 import { Timer } from "./Timer";
 import { ScoreDisplay } from "./ScoreDisplay";
@@ -8,18 +8,30 @@ import { categories } from "@/lib/categories";
 import { getIcon } from "@/lib/iconMap";
 import { useEffect, useState } from "react";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface GamePlayProps {
   gameState: GameState;
   onCorrect: () => void;
   onSkip: () => void;
   onPause: () => void;
+  onExit: () => void;
   onNextTeam?: () => void;
   isPaused?: boolean;
 }
 
-export function GamePlay({ gameState, onCorrect, onSkip, onPause, onNextTeam, isPaused = false }: GamePlayProps) {
+export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNextTeam, isPaused = false }: GamePlayProps) {
   const [showWord, setShowWord] = useState(true);
+  const [showExitDialog, setShowExitDialog] = useState(false);
   const category = categories.find((c) => c.id === gameState.currentCategory);
 
   useSwipeGesture({
@@ -53,14 +65,24 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onNextTeam, is
   return (
     <div className="min-h-screen flex flex-col p-6 md:p-8">
       <div className="flex items-center justify-between mb-8">
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={onPause}
-          data-testid="button-pause"
-        >
-          {isPaused ? <Play className="h-6 w-6" /> : <Pause className="h-6 w-6" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onPause}
+            data-testid="button-pause"
+          >
+            {isPaused ? <Play className="h-6 w-6" /> : <Pause className="h-6 w-6" />}
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setShowExitDialog(true)}
+            data-testid="button-exit"
+          >
+            <X className="h-6 w-6" />
+          </Button>
+        </div>
 
         <Timer
           timeRemaining={gameState.timeRemaining}
@@ -69,6 +91,29 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onNextTeam, is
 
         <ScoreDisplay score={gameState.score} />
       </div>
+
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Exit Game?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to exit the current game? Your progress will be saved and you'll see the game summary.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-exit">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowExitDialog(false);
+                onExit();
+              }}
+              data-testid="button-confirm-exit"
+            >
+              Exit Game
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {gameState.gameMode === "team" && currentTeam && (
         <div className="mb-6 text-center">

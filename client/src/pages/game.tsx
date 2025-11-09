@@ -103,6 +103,7 @@ export default function Game() {
             playSound("skip");
           }}
           onPause={pauseGame}
+          onExit={endGame}
           onNextTeam={() => {
             nextTeam();
             if (navigator.vibrate) {
@@ -124,6 +125,7 @@ export default function Game() {
             playSound("skip");
           }}
           onPause={resumeGame}
+          onExit={endGame}
           onNextTeam={() => {
             nextTeam();
             if (navigator.vibrate) {
@@ -148,6 +150,7 @@ export default function Game() {
             resetGame();
             setShowSettings(true);
           }}
+          onMainMenu={resetGame}
         />
       )}
 

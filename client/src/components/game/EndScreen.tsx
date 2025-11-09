@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, RotateCcw, Settings, Medal } from "lucide-react";
+import { Trophy, RotateCcw, Settings, Home } from "lucide-react";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
@@ -15,11 +15,12 @@ interface EndScreenProps {
   wordsGuessed: string[];
   onPlayAgain: () => void;
   onChangeSettings: () => void;
+  onMainMenu: () => void;
   teams?: Team[];
   gameMode?: string;
 }
 
-export function EndScreen({ score, wordsGuessed, onPlayAgain, onChangeSettings, teams, gameMode }: EndScreenProps) {
+export function EndScreen({ score, wordsGuessed, onPlayAgain, onChangeSettings, onMainMenu, teams, gameMode }: EndScreenProps) {
   const { width, height } = useWindowSize();
   
   const sortedTeams = teams ? [...teams].sort((a, b) => b.score - a.score) : [];
@@ -151,6 +152,17 @@ export function EndScreen({ score, wordsGuessed, onPlayAgain, onChangeSettings, 
           >
             <Settings className="h-6 w-6 mr-2" />
             Change Settings
+          </Button>
+
+          <Button
+            size="lg"
+            variant="outline"
+            className="w-64 h-16 text-xl font-semibold rounded-full"
+            onClick={onMainMenu}
+            data-testid="button-main-menu"
+          >
+            <Home className="h-6 w-6 mr-2" />
+            Main Menu
           </Button>
         </div>
       </div>
