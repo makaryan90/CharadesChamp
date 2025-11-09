@@ -1,0 +1,193 @@
+Main Menu Screen
+This is the entry point of the app after the splash screen. It features a vibrant, fun background with animated elements like floating charades cards or emoji icons to set a playful tone, inspired by games like Heads Up! and Charades!. The layout is simple and intuitive for quick navigation.
+
+Key Elements:
+Title: "Charades Fun!" (or similar, large and colorful at the top).
+Buttons:
+"Quick Start": Large button to jump straight into a solo or random team game.
+"Create Teams": Button to set up custom teams for multiplayer.
+"How to Play": Access rules and tutorials.
+"Settings": For app preferences like sound, notifications, or account management.
+"Subscribe": Prominent button (perhaps with a badge showing "Unlock More Categories!") leading to subscription options.
+
+Footer: Version info, privacy policy link, and perhaps a small ad banner for free users.
+Visuals: Funny icons or avatars peeking from the sides to encourage interaction.
+
+
+Quick Start Screen
+Accessed directly from the Main Menu's "Quick Start" button. This screen streamlines setup for immediate play, similar to the "Quick Play" mode in Charades! apps, where users can dive in without team customization.
+
+Key Elements:
+Header: "Ready for Quick Fun?"
+Options:
+Category Selection: A grid of free categories (e.g., Movies, Animals, Celebrities – limited to 3-5 for free users). Locked categories (e.g., Superheroes, Food, Music) show a lock icon with a "Subscribe to Unlock" prompt.
+Round Time: Slider or dropdown (60s, 90s, 120s defaulting to 60s, based on common options in top apps).
+Other Settings: Toggles for sound effects, bonus time (add 2s per correct guess), and video recording (if implemented).
+
+Buttons:
+"Start Game": Big green button to begin.
+"Back": Return to Main Menu.
+
+Visuals: Preview thumbnails for categories, with animations when selected.
+
+
+Team Creation Screen
+Triggered from the Main Menu's "Create Teams" button. This allows for personalized multiplayer setup, drawing from team-based modes in games like Heads Up!, where customization adds replay value.
+
+Key Elements:
+Header: "Build Your Teams!"
+Team Setup:
+Number of Teams: Slider or buttons (2-4 teams default).
+For Each Team:
+Name Input: Text field (e.g., "Team Awesome").
+Icon Selection: Grid of funny icons (e.g., emojis like 😂, 🐶, 🚀, or custom avatars like silly animals/hats – at least 20 options for fun).
+Color Picker: Assign team colors for easy identification.
+
+
+Buttons:
+"Next": Proceed to Game Setup Screen.
+"Back": Return to Main Menu.
+
+Visuals: Real-time preview of teams as they're created, with animations like icons bouncing when selected.
+
+
+Game Setup Screen
+This screen appears after Quick Start or Team Creation. It's the final prep before gameplay, combining category and settings choices, akin to deck selection in popular charades apps.
+
+Key Elements:
+Header: "Customize Your Game" (shows team names if created).
+Options:
+Category Selection: Expanded grid with free categories available. Paid categories (more variety like Accents, Dance Moves, Fairy Tales) are highlighted with a "Premium" badge. Free users get 3-5; subscribers unlock 20+.
+Round Time: Same as Quick Start (60s, 90s, 120s).
+Advanced Settings: Toggles for activity types (e.g., Acting Only, Singing/Dancing modes from Charades! apps), difficulty (easy/hard words), and number of rounds (3-5 default).
+
+Buttons:
+"Start Game": Launches gameplay.
+"Back": Return to previous screen (Quick Start or Team Creation).
+
+Visuals: Category cards with descriptions and sample words (blurred for spoilers).
+
+
+Gameplay Screen
+The core playing interface, where the action happens. Modeled after the forehead-holding mechanic in Heads Up! and Charades!, with tilt controls for pass/correct.
+
+Key Elements:
+Display: Large word/phrase in bold text, with category hint at the top.
+Timer: Countdown bar (e.g., 60s) with color changes (green to red as time runs low).
+Controls:
+Tilt down (device motion) for "Correct" (green flash, sound effect).
+Tilt up for "Pass" (red flash, no penalty).
+
+Team Indicator: Current team's name/icon/color in the corner.
+Visuals: Minimalist to avoid distraction – background matches team color, subtle animations for tilts.
+End of Round: Auto-transitions to Round Results Screen when time expires.
+
+
+Round Results Screen
+Appears after each round ends. Shows immediate feedback, similar to post-round summaries in top charades games for building excitement.
+
+Key Elements:
+Header: "Round Over! [Team Name]'s Turn Results"
+Stats:
+Correct Guesses: List of words guessed right.
+Passed: List of skipped words.
+Score: Points awarded (e.g., 1 per correct).
+
+Video Replay: If recorded, a "Watch Replay" button (fun feature from Heads Up!).
+Buttons:
+"Next Round": Proceed (rotates to next team).
+"End Game": Quit to Scoreboard.
+
+Visuals: Confetti animation for high scores, team icons celebrating.
+
+
+Scoreboard Screen
+Displayed after all rounds or when ending early. This is the overall game summary, inspired by competitive scorekeeping in multiplayer charades apps.
+
+Key Elements:
+Header: "Final Scores!"
+Table:
+Columns: Team Name/Icon, Rounds Won, Total Points.
+Rows: Each team ranked by score.
+
+Winner Announcement: Highlighted with animations (e.g., trophy icon).
+Buttons:
+"Play Again": Restart with same setup.
+"New Game": Back to Main Menu.
+"Share Scores": Social sharing options.
+
+Visuals: Leaderboard style with bars or stars for scores.
+
+
+How to Play / Rules Screen
+Accessible from Main Menu. Provides tutorials, essential for new players, like the guides in educational charades apps.
+
+Key Elements:
+Sections:
+Basics: "Hold phone to forehead, friends give clues without saying the word."
+Controls: Explain tilt mechanics, timing.
+Teams vs. Quick: Differences.
+Tips: "Use gestures, sounds (no words!)"
+
+Interactive Demo: Short video or step-by-step images.
+Buttons: "Back to Menu".
+Visuals: Illustrated steps with fun cartoons.
+
+
+Settings Screen
+From Main Menu, for personalization, common in apps like Charades!.
+
+Key Elements:
+Options:
+Sound: On/Off for effects/music.
+Notifications: Reminders for subscriptions.
+Account: Login for cross-device sync (if implemented).
+Language: If multi-language.
+Reset Progress: Clear data.
+
+Buttons: "Save" and "Back".
+Visuals: Simple list view.
+
+
+Subscription Screen
+Accessed via "Subscribe" from Main Menu or prompts in Category Selection. Handles monetization with monthly/annual plans, similar to in-app purchases in free charades apps for unlocking decks.
+
+Key Elements:
+Header: "Unlock Premium Fun!"
+Benefits List:
+"Access 20+ Categories (e.g., Music, Sports, Impressions)."
+"No Ads."
+"Custom Deck Creation."
+"Unlimited Plays."
+
+Plans:
+Monthly: [Price placeholder, e.g., $4.99/mo].
+Annual: [Price placeholder, e.g., $29.99/yr – save 50%!].
+
+Buttons:
+"Subscribe Monthly".
+"Subscribe Annual".
+"Restore Purchases".
+"Back" (with a "Maybe Later" option).
+
+Fine Print: Terms, auto-renewal info.
+Visuals: Before/after comparison (limited vs. full categories), secure payment icons.
+
+
+Payment Confirmation Screen
+Follows subscription selection. Standard for mobile apps.
+
+Key Elements:
+Summary: Plan details, price, billing cycle.
+Payment Method: Integrate with Replit's payment system or placeholders for card/Apple Pay/Google Pay.
+Buttons: "Confirm Payment", "Cancel".
+Visuals: Secure lock icon, success animation on completion.
+
+
+Success / Welcome Premium Screen
+Post-subscription success.
+
+Key Elements:
+Message: "Welcome to Premium! All Categories Unlocked."
+Buttons: "Start Playing" (back to Main Menu).
+Visuals: Celebration animations, unlocked icons.
