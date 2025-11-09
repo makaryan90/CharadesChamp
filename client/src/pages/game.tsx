@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { MainMenu } from "@/components/game/MainMenu";
+import { QuickStart } from "@/components/game/QuickStart";
+import { HowToPlay } from "@/components/game/HowToPlay";
 import { WelcomeScreen } from "@/components/game/WelcomeScreen";
 import { CategorySelect } from "@/components/game/CategorySelect";
 import { GamePlay } from "@/components/game/GamePlay";
@@ -10,9 +13,16 @@ import { useGameSettings } from "@/hooks/useGameSettings";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { saveGame } from "@/hooks/useSaveGame";
 
+type NavigationScreen = "main-menu" | "quick-start" | "how-to-play" | "subscribe";
+
 export default function Game() {
+  const [navigationScreen, setNavigationScreen] = useState<NavigationScreen | null>("main-menu");
   const [showSettings, setShowSettings] = useState(false);
   const [gameSaved, setGameSaved] = useState(false);
+  const [isPremium, setIsPremium] = useState(() => {
+    return localStorage.getItem("charades-premium") === "true";
+  });
+  
   const { settings, updateSettings } = useGameSettings();
   const { playSound } = useSoundEffects(settings.soundEnabled);
   const {
@@ -61,9 +71,79 @@ export default function Game() {
     };
   }, []);
 
+  const handleQuickStartGame = (selectedCategories: string[], timerLength: string) => {
+    updateSettings({ 
+      selectedCategories, 
+      timerLength: timerLength as "30" | "60" | "90",
+      gameMode: "solo" 
+    });
+    setNavigationScreen(null);
+    startGame();
+    nextWord();
+  };
+
+  const handleBackToMainMenu = () => {
+    setNavigationScreen("main-menu");
+    resetGame();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-hidden">
-      {gameState.status === "welcome" && (
+      {navigationScreen === "main-menu" && (
+        <MainMenu
+          onQuickStart={() => setNavigationScreen("quick-start")}
+          onCreateTeams={() => {
+            setNavigationScreen(null);
+            updateSettings({ gameMode: "team" });
+            startGame();
+          }}
+          onHowToPlay={() => setNavigationScreen("how-to-play")}
+          onSettings={() => setShowSettings(true)}
+          onSubscribe={() => setNavigationScreen("subscribe")}
+          isPremium={isPremium}
+        />
+      )}
+
+      {navigationScreen === "quick-start" && (
+        <QuickStart
+          onBack={() => setNavigationScreen("main-menu")}
+          onStartGame={handleQuickStartGame}
+          isPremium={isPremium}
+        />
+      )}
+
+      {navigationScreen === "how-to-play" && (
+        <HowToPlay onBack={() => setNavigationScreen("main-menu")} />
+      )}
+
+      {navigationScreen === "subscribe" && (
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="text-center space-y-4 max-w-md">
+            <h2 className="text-3xl font-bold">Premium Features</h2>
+            <p className="text-muted-foreground">Unlock all categories and features!</p>
+            <button
+              className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-bold"
+              onClick={() => {
+                setIsPremium(true);
+                localStorage.setItem("charades-premium", "true");
+                setNavigationScreen("main-menu");
+              }}
+              data-testid="button-unlock-premium"
+            >
+              Unlock Premium (Simulated)
+            </button>
+            <button
+              className="block mx-auto text-sm text-muted-foreground hover:underline"
+              onClick={() => setNavigationScreen("main-menu")}
+              data-testid="button-maybe-later"
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      )}
+
+      {gameState.status === "welcome" && !navigationScreen && (
         <WelcomeScreen
           onStartGame={() => startGame()}
           onOpenSettings={() => setShowSettings(true)}
@@ -73,7 +153,7 @@ export default function Game() {
       {gameState.status === "team-setup" && (
         <TeamSetup
           onStart={(teams) => startWithTeams(teams)}
-          onBack={resetGame}
+          onBack={handleBackToMainMenu}
         />
       )}
 
@@ -87,7 +167,7 @@ export default function Game() {
             updateSettings({ selectedCategories: newCategories });
           }}
           onStartPlaying={nextWord}
-          onBack={resetGame}
+          onBack={handleBackToMainMenu}
         />
       )}
 
@@ -150,7 +230,7 @@ export default function Game() {
             resetGame();
             setShowSettings(true);
           }}
-          onMainMenu={resetGame}
+          onMainMenu={handleBackToMainMenu}
         />
       )}
 
