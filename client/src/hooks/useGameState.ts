@@ -17,13 +17,14 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     gameMode: settings.gameMode || "solo",
     teams: [],
     currentTeamIndex: 0,
+    activeCategories: settings.selectedCategories,
   });
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const usedWordsRef = useRef<Set<string>>(new Set());
 
   const getRandomWord = (overrideCategories?: string[]) => {
-    const selectedCategories = overrideCategories || settings.selectedCategories;
+    const selectedCategories = overrideCategories || gameState.activeCategories;
     const availableCategories = categories.filter((c) =>
       selectedCategories.includes(c.id)
     );
@@ -124,6 +125,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
       gameMode,
       teams: teams || [],
       currentTeamIndex: 0,
+      activeCategories: effectiveSettings.selectedCategories,
     });
     usedWordsRef.current.clear();
   };
@@ -145,6 +147,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
       gameMode: "team",
       teams,
       currentTeamIndex: 0,
+      activeCategories: settings.selectedCategories,
     });
     usedWordsRef.current.clear();
   };
@@ -161,6 +164,8 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
       status: "playing",
       currentWord: wordData.word,
       currentCategory: wordData.categoryId,
+      // If override categories provided, update activeCategories
+      activeCategories: overrideCategories || prev.activeCategories,
     }));
 
     if (gameState.status === "category-select" || gameState.status === "welcome") {
@@ -275,6 +280,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
       gameMode: settings.gameMode || "solo",
       teams: [],
       currentTeamIndex: 0,
+      activeCategories: settings.selectedCategories,
     });
   };
 

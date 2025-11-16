@@ -79,6 +79,7 @@ export const gameStateSchema = z.object({
     color: z.string(),
   })).optional(),
   currentTeamIndex: z.number().optional(),
+  activeCategories: z.array(z.string()),
 });
 
 export type Category = z.infer<typeof categorySchema>;

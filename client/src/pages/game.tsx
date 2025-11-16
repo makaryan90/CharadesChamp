@@ -116,7 +116,7 @@ export default function Game() {
           onCreateTeams={() => {
             setNavigationScreen(null);
             updateSettings({ gameMode: "team" });
-            startGame();
+            startGame(undefined, { gameMode: "team" });
           }}
           onHowToPlay={() => setNavigationScreen("how-to-play")}
           onSettings={() => setShowSettings(true)}
@@ -188,7 +188,7 @@ export default function Game() {
               : [...settings.selectedCategories, categoryId];
             updateSettings({ selectedCategories: newCategories });
           }}
-          onStartPlaying={nextWord}
+          onStartPlaying={() => nextWord(settings.selectedCategories)}
           onBack={handleBackToMainMenu}
           onOpenSubscription={() => setShowSubscriptionModal(true)}
           isPremium={isPremium}
@@ -221,8 +221,8 @@ export default function Game() {
         <RoundEnd
           gameState={gameState}
           onContinue={() => {
-            nextWord();
             continueNextRound();
+            nextWord();
           }}
           onEndGame={endGame}
         />

@@ -19,9 +19,7 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
   const freeCategories = isPremium ? categories : categories.slice(0, FREE_CATEGORY_LIMIT);
   const premiumCategories = isPremium ? [] : categories.slice(FREE_CATEGORY_LIMIT);
   
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    categories.slice(0, 2).map(c => c.id)
-  );
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [timerLength, setTimerLength] = useState<string>("60");
   const [numberOfRounds, setNumberOfRounds] = useState<string>("5");
 
@@ -102,7 +100,7 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
           </div>
 
           {selectedCategories.length === 0 && (
-            <p className="text-sm text-destructive">Please select at least one category</p>
+            <p className="text-sm text-destructive text-center">Please select at least one category</p>
           )}
         </div>
 

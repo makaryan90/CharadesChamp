@@ -5,20 +5,55 @@ A vibrant, mobile-first charades-style party game built with React, TypeScript, 
 
 ## Recent Changes (November 16, 2025)
 
-### Quick Start Settings Application Fix (COMPLETED)
-- ✅ **Fixed Timer and Category Application**: Quick Start now correctly applies selected timer length and categories
+### Quick Start & Team Mode Fixes (COMPLETED)
+
+#### activeCategories System
+- ✅ **Added activeCategories to GameState**: Categories now persist throughout game session
+  - Added `activeCategories: string[]` to GameState schema
+  - `getRandomWord()` uses `gameState.activeCategories` instead of `settings.selectedCategories`
+  - `nextWord(overrideCategories)` updates `activeCategories` when override provided
+  - Fixes category persistence issue where settings changes weren't reflected in gameplay
+
+#### Quick Start Fixes
+- ✅ **Fixed Initial State**: Changed from pre-selecting 2 categories to empty selection
+  - Users must explicitly choose categories (no accidental multi-category games)
 - ✅ **Settings Override System**: Modified useGameState to accept override settings
-  - `startGame()` now accepts `overrideSettings` parameter
-  - `getRandomWord()` and `nextWord()` accept `overrideCategories` parameter
-  - Bypasses React state update timing issues by passing settings directly
-- ✅ **Timer Start Fix**: Timer now starts when coming from Quick Start (status "welcome" or "category-select")
-- ✅ **Category Badge Visibility**: Improved contrast with `bg-primary text-primary-foreground`
-- ✅ **Comprehensive Testing**: All round-based gameplay features tested and working
+  - `startGame()` accepts `overrideSettings` parameter
+  - Settings passed directly to bypass React state timing issues
+- ✅ **Category Application**: Quick Start categories now correctly apply throughout entire game
+  - First word uses selected categories ✅
+  - All subsequent words (Got It/Skip) maintain same categories ✅
+  - No category mixing or random switches ✅
+
+#### Team Mode Fixes
+- ✅ **Fixed Create Teams Flow**: Team setup now properly initializes and persists teams
+  - `onCreateTeams` calls `startGame(undefined, { gameMode: "team" })` to set status: "team-setup"
+  - `startWithTeams(teams)` properly sets teams and gameMode
+  - CategorySelect preserves teams via `nextWord(settings.selectedCategories)`
+- ✅ **Team UI Rendering**: Current team indicator and team scores now display correctly
+  - Team indicator shows during gameplay: "{Team Name}'s Turn" ✅
+  - Individual team scoring works ✅
+  - Team rotation between rounds ✅
+  - End screen shows team rankings ✅
+
+#### localStorage Migration
+- ✅ **Fixed Backward Compatibility**: Legacy settings without `numberOfRounds` now handled
+  - `useGameSettings` merges parsed localStorage with `DEFAULT_SETTINGS`
+  - Prevents `NaN` in round displays ("Round 1 of NaN")
+  - Defaults to 5 rounds if field missing
+
+#### Timer & Round System
+- ✅ **Timer Start Fix**: Timer starts correctly from Quick Start (status "welcome" or "category-select")
+- ✅ **Round Progression**: All round-based features tested and working
   - Settings application (timer, categories, rounds) ✅
   - Round progression (round-end screens between rounds) ✅
   - Score accumulation across rounds ✅
   - Timer reset for each round ✅
   - Final results screen after last round ✅
+
+#### End-to-End Testing
+- ✅ Quick Start flow: Empty state → select Movies → 30s/3 rounds → gameplay with Movies-only words
+- ✅ Team mode flow: Create Teams → Alpha/Beta → select Movies → team indicators → rotation → scoring
 
 ## Previous Changes (November 9, 2025)
 
