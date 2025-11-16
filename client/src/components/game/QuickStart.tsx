@@ -8,7 +8,7 @@ import { useState } from "react";
 
 interface QuickStartProps {
   onBack: () => void;
-  onStartGame: (selectedCategories: string[], timerLength: string) => void;
+  onStartGame: (selectedCategories: string[], timerLength: string, numberOfRounds: string) => void;
   onOpenSubscription?: () => void;
   isPremium?: boolean;
 }
@@ -23,6 +23,7 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
     categories.slice(0, 2).map(c => c.id)
   );
   const [timerLength, setTimerLength] = useState<string>("60");
+  const [numberOfRounds, setNumberOfRounds] = useState<string>("5");
 
   const toggleCategory = (categoryId: string) => {
     if (selectedCategories.includes(categoryId)) {
@@ -34,7 +35,7 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
 
   const handleStart = () => {
     if (selectedCategories.length === 0) return;
-    onStartGame(selectedCategories, timerLength);
+    onStartGame(selectedCategories, timerLength, numberOfRounds);
   };
 
   return (
@@ -119,6 +120,28 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
                 className="h-12 font-semibold"
                 onClick={() => setTimerLength(option.value)}
                 data-testid={`timer-${option.value}`}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-foreground">Number of Rounds</h3>
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { value: "3", label: "3 Rounds" },
+              { value: "5", label: "5 Rounds" },
+              { value: "10", label: "10 Rounds" },
+              { value: "infinite", label: "Infinite" },
+            ].map((option) => (
+              <Button
+                key={option.value}
+                variant={numberOfRounds === option.value ? "default" : "outline"}
+                className="h-12 font-semibold"
+                onClick={() => setNumberOfRounds(option.value)}
+                data-testid={`rounds-${option.value}`}
               >
                 {option.label}
               </Button>

@@ -149,11 +149,11 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
               <div className="bg-card rounded-3xl p-8 md:p-12 shadow-2xl border-2 border-card-border">
                 {category && (
                   <Badge
-                    variant="secondary"
-                    className={`mb-6 ${category.color} flex items-center gap-2`}
+                    variant="default"
+                    className="mb-6 flex items-center gap-2 text-base font-semibold px-4 py-2 bg-primary text-primary-foreground"
                     data-testid="badge-category"
                   >
-                    {getIcon(category.icon, "h-4 w-4")}
+                    {getIcon(category.icon, "h-5 w-5")}
                     {category.name}
                   </Badge>
                 )}

@@ -58,17 +58,20 @@ export const gameSettingsSchema = z.object({
   timerLength: z.enum(["30", "60", "90"]),
   selectedCategories: z.array(z.string()),
   soundEnabled: z.boolean(),
+  numberOfRounds: z.enum(["3", "5", "10", "infinite"]).default("5"),
   difficulty: z.enum(["easy", "medium", "hard"]).optional(),
   gameMode: z.enum(["solo", "team"]).optional(),
 });
 
 export const gameStateSchema = z.object({
-  status: z.enum(["welcome", "category-select", "team-setup", "playing", "paused", "ended"]),
+  status: z.enum(["welcome", "category-select", "team-setup", "playing", "paused", "ended", "round-end"]),
   score: z.number(),
   currentWord: z.string().nullable(),
   currentCategory: z.string().nullable(),
   timeRemaining: z.number(),
   wordsGuessed: z.array(z.string()),
+  currentRound: z.number().default(1),
+  totalRounds: z.number().optional(),
   gameMode: z.enum(["solo", "team"]).optional(),
   teams: z.array(z.object({
     name: z.string(),

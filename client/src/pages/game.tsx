@@ -7,6 +7,7 @@ import { WelcomeScreen } from "@/components/game/WelcomeScreen";
 import { CategorySelect } from "@/components/game/CategorySelect";
 import { GamePlay } from "@/components/game/GamePlay";
 import { EndScreen } from "@/components/game/EndScreen";
+import { RoundEnd } from "@/components/game/RoundEnd";
 import { SettingsModal } from "@/components/game/SettingsModal";
 import { TeamSetup } from "@/components/game/TeamSetup";
 import { useGameState } from "@/hooks/useGameState";
@@ -24,6 +25,7 @@ export default function Game() {
   const [isPremium, setIsPremium] = useState(() => {
     return localStorage.getItem("charades-premium") === "true";
   });
+  const [pendingGameStart, setPendingGameStart] = useState(false);
   
   const { settings, updateSettings } = useGameSettings();
   const { playSound } = useSoundEffects(settings.soundEnabled);
@@ -38,6 +40,7 @@ export default function Game() {
     endGame,
     resetGame,
     nextTeam,
+    continueNextRound,
   } = useGameState(settings, (sound: string) => playSound(sound as any));
 
   useEffect(() => {
@@ -73,15 +76,22 @@ export default function Game() {
     };
   }, []);
 
-  const handleQuickStartGame = (selectedCategories: string[], timerLength: string) => {
-    updateSettings({ 
+  const handleQuickStartGame = (selectedCategories: string[], timerLength: string, numberOfRounds: string) => {
+    const newSettings = { 
       selectedCategories, 
       timerLength: timerLength as "30" | "60" | "90",
-      gameMode: "solo" 
-    });
+      numberOfRounds: numberOfRounds as "3" | "5" | "10" | "infinite",
+      gameMode: "solo" as const,
+      soundEnabled: settings.soundEnabled,
+    };
+    
+    // Update state (useGameSettings will handle localStorage via useEffect)
+    updateSettings(newSettings);
     setNavigationScreen(null);
-    startGame();
-    nextWord();
+    
+    // Pass settings directly to startGame to avoid waiting for state update
+    startGame(undefined, newSettings);
+    nextWord(newSettings.selectedCategories);
   };
 
   const handleBackToMainMenu = () => {
@@ -204,6 +214,17 @@ export default function Game() {
               navigator.vibrate(50);
             }
           }}
+        />
+      )}
+
+      {gameState.status === "round-end" && (
+        <RoundEnd
+          gameState={gameState}
+          onContinue={() => {
+            nextWord();
+            continueNextRound();
+          }}
+          onEndGame={endGame}
         />
       )}
 

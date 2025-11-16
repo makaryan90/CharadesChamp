@@ -3,7 +3,24 @@
 ## Project Overview
 A vibrant, mobile-first charades-style party game built with React, TypeScript, and Tailwind CSS. Players select categories, race against a countdown timer, and guess words with friends in an engaging, touch-optimized interface.
 
-## Recent Changes (November 9, 2025)
+## Recent Changes (November 16, 2025)
+
+### Quick Start Settings Application Fix (COMPLETED)
+- ✅ **Fixed Timer and Category Application**: Quick Start now correctly applies selected timer length and categories
+- ✅ **Settings Override System**: Modified useGameState to accept override settings
+  - `startGame()` now accepts `overrideSettings` parameter
+  - `getRandomWord()` and `nextWord()` accept `overrideCategories` parameter
+  - Bypasses React state update timing issues by passing settings directly
+- ✅ **Timer Start Fix**: Timer now starts when coming from Quick Start (status "welcome" or "category-select")
+- ✅ **Category Badge Visibility**: Improved contrast with `bg-primary text-primary-foreground`
+- ✅ **Comprehensive Testing**: All round-based gameplay features tested and working
+  - Settings application (timer, categories, rounds) ✅
+  - Round progression (round-end screens between rounds) ✅
+  - Score accumulation across rounds ✅
+  - Timer reset for each round ✅
+  - Final results screen after last round ✅
+
+## Previous Changes (November 9, 2025)
 
 ### Phase 1: Enhanced Navigation & Premium Features (COMPLETED)
 - ✅ **Main Menu Redesign** - New MainMenu component with Quick Start, Create Teams, How to Play, Settings, and Subscribe buttons
