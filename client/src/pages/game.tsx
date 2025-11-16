@@ -27,7 +27,7 @@ export default function Game() {
   });
   const [pendingGameStart, setPendingGameStart] = useState(false);
   
-  const { settings, updateSettings } = useGameSettings();
+  const { settings, updateSettings, applySettings } = useGameSettings();
   const { playSound } = useSoundEffects(settings.soundEnabled);
   const {
     gameState,
@@ -115,8 +115,8 @@ export default function Game() {
           onQuickStart={() => setNavigationScreen("quick-start")}
           onCreateTeams={() => {
             setNavigationScreen(null);
-            updateSettings({ gameMode: "team" });
-            startGame(undefined, { gameMode: "team" });
+            const nextSettings = applySettings(prev => ({ ...prev, gameMode: "team" }));
+            startGame(undefined, nextSettings);
           }}
           onHowToPlay={() => setNavigationScreen("how-to-play")}
           onSettings={() => setShowSettings(true)}
@@ -174,7 +174,15 @@ export default function Game() {
 
       {gameState.status === "team-setup" && (
         <TeamSetup
-          onStart={(teams) => startWithTeams(teams)}
+          onStart={(teams, numberOfRounds) => {
+            // Apply settings synchronously and get the merged result
+            const nextSettings = applySettings(prev => ({ 
+              ...prev, 
+              numberOfRounds: numberOfRounds as "3" | "5" | "10" | "infinite"
+            }));
+            // Pass the synchronously computed settings to ensure persistence
+            startWithTeams(teams, nextSettings);
+          }}
           onBack={handleBackToMainMenu}
         />
       )}

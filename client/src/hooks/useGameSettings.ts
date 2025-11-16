@@ -34,8 +34,23 @@ export function useGameSettings() {
     setSettings((prev) => ({ ...prev, ...newSettings }));
   };
 
+  const applySettings = (
+    updater: Partial<GameSettings> | ((prev: GameSettings) => GameSettings)
+  ): GameSettings => {
+    let computed: GameSettings | null = null;
+    
+    setSettings((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      computed = next;
+      return next;
+    });
+    
+    return computed ?? settings;
+  };
+
   return {
     settings,
     updateSettings,
+    applySettings,
   };
 }

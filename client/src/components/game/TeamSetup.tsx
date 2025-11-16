@@ -19,7 +19,7 @@ const TEAM_COLORS = [
 ];
 
 interface TeamSetupProps {
-  onStart: (teams: Team[]) => void;
+  onStart: (teams: Team[], numberOfRounds: string) => void;
   onBack: () => void;
 }
 
@@ -28,6 +28,7 @@ export function TeamSetup({ onStart, onBack }: TeamSetupProps) {
     { name: "", score: 0, color: "purple" },
     { name: "", score: 0, color: "cyan" },
   ]);
+  const [numberOfRounds, setNumberOfRounds] = useState<string>("5");
 
   const addTeam = () => {
     if (teams.length < 6) {
@@ -62,7 +63,7 @@ export function TeamSetup({ onStart, onBack }: TeamSetupProps) {
       if (navigator.vibrate) {
         navigator.vibrate(50);
       }
-      onStart(teams);
+      onStart(teams, numberOfRounds);
     }
   };
 
@@ -141,6 +142,32 @@ export function TeamSetup({ onStart, onBack }: TeamSetupProps) {
             Add Team
           </Button>
         )}
+
+        <div className="w-full mb-6 bg-white/10 backdrop-blur-sm rounded-xl p-4 border-2 border-white/20">
+          <h3 className="text-lg font-semibold text-white mb-3">Number of Rounds</h3>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { value: "3", label: "3" },
+              { value: "5", label: "5" },
+              { value: "10", label: "10" },
+              { value: "infinite", label: "∞" },
+            ].map((option) => (
+              <Button
+                key={option.value}
+                variant={numberOfRounds === option.value ? "default" : "outline"}
+                className={`h-12 font-semibold ${
+                  numberOfRounds === option.value
+                    ? "bg-white text-purple-600 hover:bg-white/90"
+                    : "bg-white/10 border-white/30 text-white hover:bg-white/20"
+                }`}
+                onClick={() => setNumberOfRounds(option.value)}
+                data-testid={`rounds-${option.value}`}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
+        </div>
 
         <Button
           onClick={handleStart}

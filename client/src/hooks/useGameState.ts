@@ -3,6 +3,13 @@ import { type GameState, type GameSettings } from "@shared/schema";
 import { categories } from "@/lib/categories";
 
 export function useGameState(settings: GameSettings, playSound: (sound: string) => void) {
+  const latestSettingsRef = useRef<GameSettings>(settings);
+  
+  // Keep ref in sync with latest settings
+  useEffect(() => {
+    latestSettingsRef.current = settings;
+  }, [settings]);
+  
   const totalRounds = settings.numberOfRounds === "infinite" ? undefined : parseInt(settings.numberOfRounds);
   
   const [gameState, setGameState] = useState<GameState>({
@@ -106,8 +113,9 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     }
   };
 
-  const startGame = (teams?: Array<{ name: string; score: number; color: string }>, overrideSettings?: Partial<GameSettings>) => {
-    const effectiveSettings = overrideSettings ? { ...settings, ...overrideSettings } : settings;
+  const startGame = (teams?: Array<{ name: string; score: number; color: string }>, overrideSettings?: GameSettings) => {
+    // Use override settings directly when provided (already merged by caller), otherwise use latest ref
+    const effectiveSettings = overrideSettings ?? latestSettingsRef.current;
     const gameMode = effectiveSettings.gameMode || "solo";
     const totalRounds = effectiveSettings.numberOfRounds === "infinite" 
       ? undefined 
@@ -130,24 +138,26 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     usedWordsRef.current.clear();
   };
 
-  const startWithTeams = (teams: Array<{ name: string; score: number; color: string }>) => {
-    const totalRounds = settings.numberOfRounds === "infinite" 
+  const startWithTeams = (teams: Array<{ name: string; score: number; color: string }>, overrideSettings?: GameSettings) => {
+    // Use override settings directly when provided (already merged by caller), otherwise use latest ref
+    const effectiveSettings = overrideSettings ?? latestSettingsRef.current;
+    const totalRounds = effectiveSettings.numberOfRounds === "infinite" 
       ? undefined 
-      : parseInt(settings.numberOfRounds || "5");
+      : parseInt(effectiveSettings.numberOfRounds || "5");
     
     setGameState({
       status: "category-select",
       score: 0,
       currentWord: null,
       currentCategory: null,
-      timeRemaining: parseInt(settings.timerLength),
+      timeRemaining: parseInt(effectiveSettings.timerLength),
       wordsGuessed: [],
       currentRound: 1,
       totalRounds,
       gameMode: "team",
       teams,
       currentTeamIndex: 0,
-      activeCategories: settings.selectedCategories,
+      activeCategories: effectiveSettings.selectedCategories,
     });
     usedWordsRef.current.clear();
   };

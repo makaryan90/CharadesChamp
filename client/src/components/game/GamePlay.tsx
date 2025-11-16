@@ -89,7 +89,7 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
           totalTime={parseInt(localStorage.getItem("timerLength") || "60")}
         />
 
-        <ScoreDisplay score={gameState.score} />
+        <ScoreDisplay score={gameState.gameMode === "team" && currentTeam ? currentTeam.score : gameState.score} />
       </div>
 
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
