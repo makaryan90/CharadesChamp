@@ -1,0 +1,52 @@
+Implement ALL the missing viral + revenue features below, in this exact order. Create any new files inside /client/src only. Never touch /server.
+
+1. Premium Decks System
+   - Create client/src/lib/premiumDecks.ts → export const premiumDecks = [...] with 35 premium packs (25–30 words each). Examples: Disney Characters, Marvel Heroes, Harry Potter Spells, Friends Quotes, The Office Characters, TikTok Dances, Adult Only (18+), Christmas, Halloween, 80s Hits, Netflix Shows, etc.
+   - Update client/src/lib/categories.ts → add a boolean `premium: true` to every new premium deck and export combined `allCategories = [...freeCategories, ...premiumDecks]`
+
+2. Premium State Hook
+   - Create client/src/lib/premium.ts → export const usePremium = () => { ... } that reads localStorage "charades-premium" and provides isPremium + unlockPremium()
+
+3. Beautiful Deck Shop Screen
+   - Create client/src/components/game/DeckShop.tsx
+   - Grid of all categories (free + premium)
+   - Show lock icon + "Premium" badge on locked ones
+   - Clicking a locked deck opens PaywallModal
+
+4. Paywall Modal (replace current fake one)
+   - Create client/src/components/game/PaywallModal.tsx
+   - Three options: Lifetime $9.99 · Yearly $19.99 (Best Value) · Monthly $2.99
+   - "Unlock Now" button simulates purchase (sets localStorage + refreshes)
+   - Add later comment for RevenueCat integration
+
+5. Hybrid Ads (AdMob ready)
+   - Run these commands first:
+     npm install @capacitor-community/admob @capacitor/core
+   - Create client/src/lib/ads.ts → initializeAdMob(), showRewarded(), showInterstitial()
+   - In GamePlay.tsx: add "Watch Ad for +5 seconds" button when <10s left
+   - In EndScreen → MainMenu transition: show interstitial if not premium
+
+6. Video Recording & Sharing (the #1 viral feature)
+   - Create client/src/components/game/VideoRecorder.tsx
+   - Add small "REC" toggle button in GamePlay top-right
+   - Use MediaRecorder + getUserMedia (screen + camera PiP)
+   - Auto-stop at round end → show preview + "Share" (downloads video + copies link)
+
+7. Polish & Retention
+   - npm install canvas-confetti
+   - On correct guess → confetti + strong haptic (navigator.vibrate([100, 50, 100]))
+   - Add "Best Moments" gallery in Main Menu (shows saved videos)
+
+8. PWA Perfection
+   - Create client/public/manifest.json (icon 512x512, name "Charades Party", start_url "/", display: "standalone")
+   - Create client/src/service-worker.js (basic offline cache)
+   - Add meta tags in index.html for iOS/Android install prompt
+
+9. Final Touches
+   - Update CategorySelect to use allCategories and show padlocks
+   - Add "More Decks" button in MainMenu that goes to DeckShop
+   - Show "Go Premium" banner on MainMenu if not premium
+
+Use exactly the same code style: shadcn/ui components, Tailwind, Lucide icons, proper TypeScript. Never break existing gameplay.
+
+Generate files one by one and say “File created: client/src/...” after each. Do NOT stop until the entire app feels like a Top 50 Party Game.

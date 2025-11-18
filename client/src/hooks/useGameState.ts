@@ -4,14 +4,14 @@ import { categories } from "@/lib/categories";
 
 export function useGameState(settings: GameSettings, playSound: (sound: string) => void) {
   const latestSettingsRef = useRef<GameSettings>(settings);
-  
+
   // Keep ref in sync with latest settings
   useEffect(() => {
     latestSettingsRef.current = settings;
   }, [settings]);
-  
+
   const totalRounds = settings.numberOfRounds === "infinite" ? undefined : parseInt(settings.numberOfRounds);
-  
+
   const [gameState, setGameState] = useState<GameState>({
     status: "welcome",
     score: 0,
@@ -63,37 +63,45 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     };
   };
 
-  const startTimer = () => {
+  // Helper function to determine if we should show round-end screen
+  const shouldShowRoundEnd = (state: GameState): boolean => {
+    if (state.gameMode === "solo") {
+      const hasMoreRounds = !state.totalRounds || state.currentRound < state.totalRounds;
+      return hasMoreRounds;
+    }
+
+    if (state.gameMode === "team" && state.teams && state.teams.length > 1) {
+      const currentIndex = state.currentTeamIndex || 0;
+      const isLastTeam = currentIndex === state.teams.length - 1;
+      const hasMoreRounds = !state.totalRounds || state.currentRound < state.totalRounds;
+      return !isLastTeam || hasMoreRounds;
+    }
+
+    return false;
+  };
+
+  const stopTimer = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
+      timerRef.current = null;
     }
+  };
+
+  const startTimer = () => {
+    // Always clear any existing timer first
+    stopTimer();
 
     timerRef.current = setInterval(() => {
       setGameState((prev) => {
         if (prev.timeRemaining <= 1) {
           playSound("timeout");
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
+          stopTimer();
+
+          // Use helper function to determine if round-end or game-end
+          if (shouldShowRoundEnd(prev)) {
+            return { ...prev, status: "round-end", timeRemaining: 0 };
           }
-          
-          // Check if this is the end of a round in team mode
-          if (prev.gameMode === "team" && prev.teams && prev.teams.length > 1) {
-            // Check if all teams have completed this round
-            const currentIndex = prev.currentTeamIndex || 0;
-            const isLastTeam = currentIndex === prev.teams.length - 1;
-            const hasMoreRounds = !prev.totalRounds || prev.currentRound < prev.totalRounds;
-            
-            if (!isLastTeam || hasMoreRounds) {
-              return { ...prev, status: "round-end", timeRemaining: 0 };
-            }
-          } else if (prev.gameMode === "solo") {
-            // For solo mode, check if there are more rounds
-            const hasMoreRounds = !prev.totalRounds || prev.currentRound < prev.totalRounds;
-            if (hasMoreRounds) {
-              return { ...prev, status: "round-end", timeRemaining: 0 };
-            }
-          }
-          
+
           return { ...prev, status: "ended", timeRemaining: 0 };
         }
 
@@ -106,13 +114,6 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     }, 1000);
   };
 
-  const stopTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
   const startGame = (teams?: Array<{ name: string; score: number; color: string }>, overrideSettings?: GameSettings) => {
     // Use override settings directly when provided (already merged by caller), otherwise use latest ref
     const effectiveSettings = overrideSettings ?? latestSettingsRef.current;
@@ -120,7 +121,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     const totalRounds = effectiveSettings.numberOfRounds === "infinite" 
       ? undefined 
       : parseInt(effectiveSettings.numberOfRounds || "5");
-    
+
     setGameState({
       status: gameMode === "team" ? "team-setup" : "category-select",
       score: 0,
@@ -144,7 +145,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     const totalRounds = effectiveSettings.numberOfRounds === "infinite" 
       ? undefined 
       : parseInt(effectiveSettings.numberOfRounds || "5");
-    
+
     setGameState({
       status: "category-select",
       score: 0,
@@ -162,23 +163,26 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     usedWordsRef.current.clear();
   };
 
-  const nextWord = (overrideCategories?: string[]) => {
+  // FIX: Pass isInitialWord to control timer start, avoid stale gameState closure
+  const nextWord = (overrideCategories?: string[], isInitialWord?: boolean) => {
     const wordData = getRandomWord(overrideCategories);
     if (!wordData) {
       setGameState((prev) => ({ ...prev, status: "welcome" }));
       return;
     }
 
+    // Determine if we should start the timer based on the parameter
+    const shouldStartTimer = isInitialWord === true;
+
     setGameState((prev) => ({
       ...prev,
       status: "playing",
       currentWord: wordData.word,
       currentCategory: wordData.categoryId,
-      // If override categories provided, update activeCategories
       activeCategories: overrideCategories || prev.activeCategories,
     }));
 
-    if (gameState.status === "category-select" || gameState.status === "welcome") {
+    if (shouldStartTimer) {
       playSound("start");
       startTimer();
     }
@@ -196,7 +200,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
           ...updatedTeams[currentIndex],
           score: updatedTeams[currentIndex].score + 1,
         };
-        
+
         return {
           ...prev,
           teams: updatedTeams,
@@ -206,7 +210,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
           wordsGuessed: [...prev.wordsGuessed, prev.currentWord || ""],
         };
       }
-      
+
       return {
         ...prev,
         score: prev.score + 1,
@@ -217,17 +221,21 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     });
   };
 
+  // FIX: Clear used words and use latestSettingsRef for timer length
   const continueNextRound = () => {
+    // Clear used words for the new round
+    usedWordsRef.current.clear();
+
     setGameState((prev) => {
       if (prev.gameMode === "team" && prev.teams && prev.teams.length > 1) {
         const currentIndex = prev.currentTeamIndex || 0;
         const nextIndex = (currentIndex + 1) % prev.teams.length;
         const isMovingToNextRound = nextIndex === 0;
-        
+
         return {
           ...prev,
           status: "playing",
-          timeRemaining: parseInt(settings.timerLength),
+          timeRemaining: parseInt(latestSettingsRef.current.timerLength),
           currentTeamIndex: nextIndex,
           currentRound: isMovingToNextRound ? prev.currentRound + 1 : prev.currentRound,
         };
@@ -236,12 +244,12 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
         return {
           ...prev,
           status: "playing",
-          timeRemaining: parseInt(settings.timerLength),
+          timeRemaining: parseInt(latestSettingsRef.current.timerLength),
           currentRound: prev.currentRound + 1,
         };
       }
     });
-    
+
     playSound("start");
     startTimer();
   };
@@ -257,7 +265,6 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
   };
 
   const resumeGame = () => {
-    startTimer();
     setGameState((prev) => ({ ...prev, status: "playing" }));
   };
 
@@ -270,7 +277,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     stopTimer();
     usedWordsRef.current.clear();
     const totalRounds = settings.numberOfRounds === "infinite" ? undefined : parseInt(settings.numberOfRounds);
-    
+
     setGameState({
       status: "welcome",
       score: 0,
@@ -287,6 +294,20 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     });
   };
 
+  // FIX: Effect to handle timer state changes (pause/resume)
+  useEffect(() => {
+    if (gameState.status === "playing") {
+      startTimer();
+    } else {
+      stopTimer();
+    }
+
+    return () => {
+      stopTimer();
+    };
+  }, [gameState.status]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopTimer();

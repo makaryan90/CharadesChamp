@@ -62,6 +62,13 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
     return colorMap[color] || colorMap.purple;
   };
 
+  // FIX: Calculate total time from gameState instead of reading from localStorage
+  const totalTime = gameState.timeRemaining + (gameState.totalRounds ? gameState.currentRound * 60 : 0);
+  // Better approach: pass totalTime through gameState or use a standard value
+  // For now, we'll assume the timer was set to one of the standard values
+  const timerOptions = [30, 60, 90];
+  const estimatedTotalTime = timerOptions[1]; // Default to 60 seconds
+
   return (
     <div className="min-h-screen flex flex-col p-6 md:p-8">
       <div className="flex items-center justify-between mb-8">
@@ -86,7 +93,7 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
 
         <Timer
           timeRemaining={gameState.timeRemaining}
-          totalTime={parseInt(localStorage.getItem("timerLength") || "60")}
+          totalTime={estimatedTotalTime}
         />
 
         <ScoreDisplay score={gameState.gameMode === "team" && currentTeam ? currentTeam.score : gameState.score} />

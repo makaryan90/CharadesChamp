@@ -28,7 +28,7 @@ export default function Game() {
   });
   const [pendingGameStart, setPendingGameStart] = useState(false);
   const [previousTeams, setPreviousTeams] = useState<Array<{ name: string; score: number; color: string }>>([]);
-  
+
   const { settings, updateSettings, applySettings } = useGameSettings();
   const { playSound } = useSoundEffects(settings.soundEnabled);
   const {
@@ -49,7 +49,7 @@ export default function Game() {
     if (gameState.status === "ended" && !gameSaved) {
       const timerDuration = parseInt(settings.timerLength);
       const actualDuration = timerDuration - gameState.timeRemaining;
-      
+
       const teamsToSave = gameState.teams?.map((team, index) => ({
         ...team,
         orderIndex: index,
@@ -86,14 +86,15 @@ export default function Game() {
       gameMode: "solo" as const,
       soundEnabled: settings.soundEnabled,
     };
-    
+
     // Update state (useGameSettings will handle localStorage via useEffect)
     updateSettings(newSettings);
     setNavigationScreen(null);
-    
+
     // Pass settings directly to startGame to avoid waiting for state update
+    // FIX: Pass isInitialWord flag to trigger timer start
     startGame(undefined, newSettings);
-    nextWord(newSettings.selectedCategories);
+    nextWord(newSettings.selectedCategories, true);
   };
 
   const handleBackToMainMenu = () => {
@@ -203,7 +204,8 @@ export default function Game() {
               : [...settings.selectedCategories, categoryId];
             updateSettings({ selectedCategories: newCategories });
           }}
-          onStartPlaying={() => nextWord(settings.selectedCategories)}
+          // FIX: Pass isInitialWord flag to trigger timer start for category selection
+          onStartPlaying={() => nextWord(settings.selectedCategories, true)}
           onBack={handleBackToMainMenu}
           onOpenSubscription={() => setShowSubscriptionModal(true)}
           isPremium={isPremium}
@@ -218,7 +220,7 @@ export default function Game() {
             playSound("correct");
           }}
           onSkip={() => {
-            nextWord();
+            nextWord(settings.selectedCategories);
             playSound("skip");
           }}
           onPause={pauseGame}
@@ -229,6 +231,7 @@ export default function Game() {
               navigator.vibrate(50);
             }
           }}
+          isPaused={false}
         />
       )}
 
@@ -237,7 +240,8 @@ export default function Game() {
           gameState={gameState}
           onContinue={() => {
             continueNextRound();
-            nextWord();
+            // FIX: Pass categories to avoid missing words from wrong categories
+            nextWord(settings.selectedCategories, false);
           }}
           onEndGame={endGame}
         />
@@ -251,7 +255,7 @@ export default function Game() {
             playSound("correct");
           }}
           onSkip={() => {
-            nextWord();
+            nextWord(settings.selectedCategories);
             playSound("skip");
           }}
           onPause={resumeGame}
@@ -262,7 +266,7 @@ export default function Game() {
               navigator.vibrate(50);
             }
           }}
-          isPaused
+          isPaused={true}
         />
       )}
 
@@ -277,7 +281,8 @@ export default function Game() {
               setPreviousTeams(gameState.teams);
               const teamSettings: GameSettings = { ...settings, gameMode: "team" };
               updateSettings(teamSettings);
-              startGame(undefined, teamSettings);
+              // FIX: Pass teams to startGame so it doesn't go back to team-setup
+              startGame(gameState.teams, teamSettings);
             } else {
               resetGame();
             }
