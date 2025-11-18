@@ -52,6 +52,7 @@ export const categorySchema = z.object({
   icon: z.string(),
   color: z.string(),
   words: z.array(z.string()),
+  premium: z.boolean().optional(),
 });
 
 export const gameSettingsSchema = z.object({

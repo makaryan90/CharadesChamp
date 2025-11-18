@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { MainMenu } from "@/components/game/MainMenu";
 import { QuickStart } from "@/components/game/QuickStart";
 import { HowToPlay } from "@/components/game/HowToPlay";
-import { SubscriptionModal } from "@/components/game/SubscriptionModal";
+import { PaywallModal } from "@/components/game/PaywallModal";
+import { DeckShop } from "@/components/game/DeckShop";
 import { WelcomeScreen } from "@/components/game/WelcomeScreen";
 import { CategorySelect } from "@/components/game/CategorySelect";
 import { GamePlay } from "@/components/game/GamePlay";
@@ -13,20 +14,19 @@ import { TeamSetup } from "@/components/game/TeamSetup";
 import { useGameState } from "@/hooks/useGameState";
 import { useGameSettings } from "@/hooks/useGameSettings";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { usePremium } from "@/lib/premium";
 import { saveGame } from "@/hooks/useSaveGame";
+import { showInterstitial } from "@/lib/ads";
 import type { GameSettings } from "@shared/schema";
 
-type NavigationScreen = "main-menu" | "quick-start" | "how-to-play" | "subscribe";
+type NavigationScreen = "main-menu" | "quick-start" | "how-to-play" | "deck-shop";
 
 export default function Game() {
   const [navigationScreen, setNavigationScreen] = useState<NavigationScreen | null>("main-menu");
   const [showSettings, setShowSettings] = useState(false);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showPaywallModal, setShowPaywallModal] = useState(false);
   const [gameSaved, setGameSaved] = useState(false);
-  const [isPremium, setIsPremium] = useState(() => {
-    return localStorage.getItem("charades-premium") === "true";
-  });
-  const [pendingGameStart, setPendingGameStart] = useState(false);
+  const { isPremium, unlockPremium } = usePremium();
   const [previousTeams, setPreviousTeams] = useState<Array<{ name: string; score: number; color: string }>>([]);
 
   const { settings, updateSettings, applySettings } = useGameSettings();
@@ -43,6 +43,7 @@ export default function Game() {
     resetGame,
     nextTeam,
     continueNextRound,
+    addTime,
   } = useGameState(settings, (sound: string) => playSound(sound as any));
 
   useEffect(() => {
@@ -103,12 +104,20 @@ export default function Game() {
   };
 
   const handleUnlockPremium = () => {
-    setIsPremium(true);
-    localStorage.setItem("charades-premium", "true");
-    setShowSubscriptionModal(false);
-    if (navigationScreen === "subscribe") {
-      setNavigationScreen("main-menu");
+    unlockPremium();
+    setShowPaywallModal(false);
+  };
+
+  const handleAddTime = (seconds: number) => {
+    addTime(seconds);
+  };
+
+  const handleBackToMainMenuWithAd = async () => {
+    // Show interstitial ad if not premium
+    if (!isPremium) {
+      await showInterstitial();
     }
+    handleBackToMainMenu();
   };
 
   return (
@@ -127,7 +136,8 @@ export default function Game() {
           }}
           onHowToPlay={() => setNavigationScreen("how-to-play")}
           onSettings={() => setShowSettings(true)}
-          onSubscribe={() => setNavigationScreen("subscribe")}
+          onSubscribe={() => setShowPaywallModal(true)}
+          onDeckShop={() => setNavigationScreen("deck-shop")}
           isPremium={isPremium}
         />
       )}
@@ -136,7 +146,7 @@ export default function Game() {
         <QuickStart
           onBack={() => setNavigationScreen("main-menu")}
           onStartGame={handleQuickStartGame}
-          onOpenSubscription={() => setShowSubscriptionModal(true)}
+          onOpenSubscription={() => setShowPaywallModal(true)}
           isPremium={isPremium}
         />
       )}
@@ -145,31 +155,12 @@ export default function Game() {
         <HowToPlay onBack={() => setNavigationScreen("main-menu")} />
       )}
 
-      {navigationScreen === "subscribe" && (
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="text-center space-y-4 max-w-md">
-            <h2 className="text-3xl font-bold">Premium Features</h2>
-            <p className="text-muted-foreground">Unlock all categories and features!</p>
-            <button
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-bold"
-              onClick={() => {
-                setIsPremium(true);
-                localStorage.setItem("charades-premium", "true");
-                setNavigationScreen("main-menu");
-              }}
-              data-testid="button-unlock-premium"
-            >
-              Unlock Premium (Simulated)
-            </button>
-            <button
-              className="block mx-auto text-sm text-muted-foreground hover:underline"
-              onClick={() => setNavigationScreen("main-menu")}
-              data-testid="button-maybe-later"
-            >
-              Maybe Later
-            </button>
-          </div>
-        </div>
+      {navigationScreen === "deck-shop" && (
+        <DeckShop
+          onBack={() => setNavigationScreen("main-menu")}
+          onOpenPaywall={() => setShowPaywallModal(true)}
+          isPremium={isPremium}
+        />
       )}
 
       {gameState.status === "welcome" && !navigationScreen && (
@@ -207,7 +198,7 @@ export default function Game() {
           // FIX: Pass isInitialWord flag to trigger timer start for category selection
           onStartPlaying={() => nextWord(settings.selectedCategories, true)}
           onBack={handleBackToMainMenu}
-          onOpenSubscription={() => setShowSubscriptionModal(true)}
+          onOpenSubscription={() => setShowPaywallModal(true)}
           isPremium={isPremium}
         />
       )}
@@ -232,6 +223,8 @@ export default function Game() {
             }
           }}
           isPaused={false}
+          isPremium={isPremium}
+          onAddTime={handleAddTime}
         />
       )}
 
@@ -267,6 +260,8 @@ export default function Game() {
             }
           }}
           isPaused={true}
+          isPremium={isPremium}
+          onAddTime={handleAddTime}
         />
       )}
 
@@ -292,7 +287,7 @@ export default function Game() {
             resetGame();
             setShowSettings(true);
           }}
-          onMainMenu={handleBackToMainMenu}
+          onMainMenu={handleBackToMainMenuWithAd}
         />
       )}
 
@@ -303,13 +298,10 @@ export default function Game() {
         onUpdateSettings={updateSettings}
       />
 
-      <SubscriptionModal
-        isOpen={showSubscriptionModal}
-        onClose={() => setShowSubscriptionModal(false)}
+      <PaywallModal
+        isOpen={showPaywallModal}
+        onClose={() => setShowPaywallModal(false)}
         onUnlock={handleUnlockPremium}
-        onRegister={() => {
-          alert("Registration page coming soon! For now, click 'Unlock Now' to simulate premium unlock.");
-        }}
       />
     </div>
   );

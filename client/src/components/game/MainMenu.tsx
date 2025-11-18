@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Zap, Users, HelpCircle, Settings, Crown, Sparkles } from "lucide-react";
-import { categories } from "@/lib/categories";
+import { Zap, Users, HelpCircle, Settings, Crown, Sparkles, Package } from "lucide-react";
+import { categories, allCategories } from "@/lib/categories";
 import { getIcon } from "@/lib/iconMap";
 
 interface MainMenuProps {
@@ -10,6 +10,7 @@ interface MainMenuProps {
   onHowToPlay: () => void;
   onSettings: () => void;
   onSubscribe: () => void;
+  onDeckShop?: () => void;
   isPremium?: boolean;
 }
 
@@ -19,8 +20,11 @@ export function MainMenu({
   onHowToPlay,
   onSettings,
   onSubscribe,
+  onDeckShop,
   isPremium = false,
 }: MainMenuProps) {
+  const freeCount = allCategories.filter((cat) => !cat.premium).length;
+  const premiumCount = allCategories.filter((cat) => cat.premium).length;
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-8 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -91,6 +95,19 @@ export function MainMenu({
             Create Teams
           </Button>
 
+          {onDeckShop && (
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full max-w-md h-14 text-lg font-bold rounded-full border-2"
+              onClick={onDeckShop}
+              data-testid="button-deck-shop"
+            >
+              <Package className="h-5 w-5 mr-2" />
+              More Decks ({allCategories.length})
+            </Button>
+          )}
+
           <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
             <Button
               variant="outline"
@@ -114,16 +131,25 @@ export function MainMenu({
           </div>
 
           {!isPremium && (
-            <Card className="p-4 bg-gradient-to-r from-accent/20 to-primary/20 border-2 border-accent hover-elevate active-elevate-2 cursor-pointer" onClick={onSubscribe}>
+            <Card className="p-4 bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-primary hover-elevate active-elevate-2 cursor-pointer" onClick={onSubscribe}>
               <div className="flex items-center justify-between gap-3" data-testid="button-subscribe">
                 <div className="flex items-center gap-2">
-                  <Crown className="h-6 w-6 text-accent" />
+                  <Crown className="h-6 w-6 text-primary" />
                   <div className="text-left">
-                    <p className="text-sm font-bold text-foreground">Unlock Premium</p>
-                    <p className="text-xs text-muted-foreground">20+ Categories & More!</p>
+                    <p className="text-sm font-bold text-foreground">Go Premium!</p>
+                    <p className="text-xs text-muted-foreground">Unlock {premiumCount} Premium Decks</p>
                   </div>
                 </div>
-                <Sparkles className="h-5 w-5 text-accent animate-pulse" />
+                <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+              </div>
+            </Card>
+          )}
+
+          {isPremium && (
+            <Card className="p-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
+              <div className="flex items-center justify-center gap-2">
+                <Crown className="h-5 w-5 text-green-500" />
+                <p className="text-sm font-semibold text-foreground">Premium Active - All {allCategories.length} Decks Unlocked!</p>
               </div>
             </Card>
           )}

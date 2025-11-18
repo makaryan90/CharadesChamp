@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { type GameState, type GameSettings } from "@shared/schema";
-import { categories } from "@/lib/categories";
+import { allCategories } from "@/lib/categories";
 
 export function useGameState(settings: GameSettings, playSound: (sound: string) => void) {
   const latestSettingsRef = useRef<GameSettings>(settings);
@@ -32,7 +32,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
 
   const getRandomWord = (overrideCategories?: string[]) => {
     const selectedCategories = overrideCategories || gameState.activeCategories;
-    const availableCategories = categories.filter((c) =>
+    const availableCategories = allCategories.filter((c) =>
       selectedCategories.includes(c.id)
     );
 
@@ -294,6 +294,13 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     });
   };
 
+  const addTime = (seconds: number) => {
+    setGameState((prev) => ({
+      ...prev,
+      timeRemaining: prev.timeRemaining + seconds,
+    }));
+  };
+
   // FIX: Effect to handle timer state changes (pause/resume)
   useEffect(() => {
     if (gameState.status === "playing") {
@@ -326,5 +333,6 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
     resetGame,
     nextTeam,
     continueNextRound,
+    addTime,
   };
 }

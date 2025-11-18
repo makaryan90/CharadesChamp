@@ -1,5 +1,7 @@
 import { type Category } from "@shared/schema";
+import { premiumDecks } from "./premiumDecks";
 
+// Free categories (first 9 are always free)
 export const categories: Category[] = [
   {
     id: "movies",
@@ -612,3 +614,6 @@ export const categories: Category[] = [
     ],
   },
 ];
+
+// All categories combined (9 free + 35 premium = 44 total)
+export const allCategories: Category[] = [...categories, ...premiumDecks];

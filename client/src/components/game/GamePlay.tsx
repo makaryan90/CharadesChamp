@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pause, Play, ChevronRight, Check, X } from "lucide-react";
+import { Pause, Play, ChevronRight, Check, X, Tv } from "lucide-react";
 import { type GameState } from "@shared/schema";
 import { Timer } from "./Timer";
 import { ScoreDisplay } from "./ScoreDisplay";
-import { categories } from "@/lib/categories";
+import { allCategories } from "@/lib/categories";
 import { getIcon } from "@/lib/iconMap";
 import { useEffect, useState } from "react";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import confetti from "canvas-confetti";
+import { showRewardedAd } from "@/lib/ads";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,16 +29,52 @@ interface GamePlayProps {
   onExit: () => void;
   onNextTeam?: () => void;
   isPaused?: boolean;
+  onAddTime?: (seconds: number) => void;
+  isPremium?: boolean;
 }
 
-export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNextTeam, isPaused = false }: GamePlayProps) {
+export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNextTeam, isPaused = false, onAddTime, isPremium = false }: GamePlayProps) {
   const [showWord, setShowWord] = useState(true);
   const [showExitDialog, setShowExitDialog] = useState(false);
-  const category = categories.find((c) => c.id === gameState.currentCategory);
+  const [isWatchingAd, setIsWatchingAd] = useState(false);
+  const category = allCategories.find((c) => c.id === gameState.currentCategory);
+
+  const handleCorrect = () => {
+    // Trigger confetti explosion
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ["#a855f7", "#06b6d4", "#f97316"],
+    });
+
+    // Enhanced haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200]);
+    }
+
+    onCorrect();
+  };
+
+  const handleWatchAd = async () => {
+    setIsWatchingAd(true);
+    const result = await showRewardedAd();
+    
+    if (result.success && result.reward && onAddTime) {
+      onAddTime(result.reward);
+      
+      // Show success feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(100);
+      }
+    }
+    
+    setIsWatchingAd(false);
+  };
 
   useSwipeGesture({
     onSwipeUp: !isPaused ? onSkip : undefined,
-    onSwipeRight: !isPaused ? onCorrect : undefined,
+    onSwipeRight: !isPaused ? handleCorrect : undefined,
   });
 
   useEffect(() => {
@@ -179,7 +217,7 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
             <Button
               size="lg"
               className="w-full max-w-md mx-auto h-16 text-xl font-semibold rounded-full bg-chart-4 hover:bg-chart-4 text-white border-2 border-chart-4"
-              onClick={onCorrect}
+              onClick={handleCorrect}
               data-testid="button-correct"
             >
               <Check className="h-6 w-6 mr-2" />
@@ -196,6 +234,29 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
               <ChevronRight className="h-6 w-6 mr-2" />
               Skip
             </Button>
+
+            {!isPremium && gameState.timeRemaining < 15 && onAddTime && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full max-w-md mx-auto h-16 text-xl font-semibold rounded-full border-2 border-primary text-primary hover:bg-primary/10"
+                onClick={handleWatchAd}
+                disabled={isWatchingAd}
+                data-testid="button-watch-ad"
+              >
+                {isWatchingAd ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin mr-2" />
+                    Loading Ad...
+                  </>
+                ) : (
+                  <>
+                    <Tv className="h-6 w-6 mr-2" />
+                    Watch Ad for +10 Sec
+                  </>
+                )}
+              </Button>
+            )}
 
             {gameState.gameMode === "team" && onNextTeam && gameState.teams && gameState.teams.length > 1 && (
               <Button

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { categories } from "@/lib/categories";
+import { allCategories } from "@/lib/categories";
 import { CategoryCard } from "./CategoryCard";
 
 interface CategorySelectProps {
@@ -24,6 +24,14 @@ export function CategorySelect({
 }: CategorySelectProps) {
   const canStart = selectedCategories.length > 0;
 
+  const handleCategoryClick = (categoryId: string, isLocked: boolean | undefined) => {
+    if (isLocked) {
+      onOpenSubscription?.();
+    } else {
+      onCategoryToggle(categoryId);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col p-6 md:p-8">
       <div className="flex items-center justify-between mb-8">
@@ -43,14 +51,14 @@ export function CategorySelect({
 
       <div className="flex-1 max-w-4xl w-full mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-          {categories.map((category, index) => {
-            const isLocked = !isPremium && index >= FREE_CATEGORY_LIMIT;
+          {allCategories.map((category) => {
+            const isLocked = !isPremium && category.premium;
             return (
               <CategoryCard
                 key={category.id}
                 category={category}
                 isSelected={selectedCategories.includes(category.id)}
-                onToggle={() => onCategoryToggle(category.id)}
+                onToggle={() => handleCategoryClick(category.id, isLocked)}
                 isLocked={isLocked}
                 onLockedClick={onOpenSubscription}
               />

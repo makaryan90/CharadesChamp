@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Lock, ArrowLeft, Play } from "lucide-react";
-import { categories } from "@/lib/categories";
+import { allCategories } from "@/lib/categories";
 import { getIcon } from "@/lib/iconMap";
 import { useState } from "react";
 
@@ -13,11 +13,10 @@ interface QuickStartProps {
   isPremium?: boolean;
 }
 
-const FREE_CATEGORY_LIMIT = 5;
-
 export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium = false }: QuickStartProps) {
-  const freeCategories = isPremium ? categories : categories.slice(0, FREE_CATEGORY_LIMIT);
-  const premiumCategories = isPremium ? [] : categories.slice(FREE_CATEGORY_LIMIT);
+  const freeCategories = allCategories.filter(c => !c.premium);
+  const premiumCategories = isPremium ? [] : allCategories.filter(c => c.premium);
+  const allAvailableCategories = isPremium ? allCategories : freeCategories;
   
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [timerLength, setTimerLength] = useState<string>("60");
@@ -56,7 +55,7 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
           <h3 className="text-lg font-semibold text-foreground">Choose Categories</h3>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {freeCategories.map((category) => {
+            {allAvailableCategories.map((category) => {
               const isSelected = selectedCategories.includes(category.id);
               return (
                 <Card
@@ -72,7 +71,8 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
                       {getIcon(category.icon, "h-10 w-10")}
                     </div>
                     <span className="text-sm font-semibold">{category.name}</span>
-                    {!isPremium && <Badge variant="secondary" className="text-xs">Free</Badge>}
+                    {category.premium && <Badge variant="secondary" className="text-xs">Premium</Badge>}
+                    {!category.premium && !isPremium && <Badge variant="secondary" className="text-xs">Free</Badge>}
                   </div>
                 </Card>
               );
