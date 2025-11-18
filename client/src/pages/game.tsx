@@ -27,6 +27,7 @@ export default function Game() {
     return localStorage.getItem("charades-premium") === "true";
   });
   const [pendingGameStart, setPendingGameStart] = useState(false);
+  const [previousTeams, setPreviousTeams] = useState<Array<{ name: string; score: number; color: string }>>([]);
   
   const { settings, updateSettings, applySettings } = useGameSettings();
   const { playSound } = useSoundEffects(settings.soundEnabled);
@@ -179,7 +180,9 @@ export default function Game() {
 
       {gameState.status === "team-setup" && (
         <TeamSetup
+          initialTeams={previousTeams.length > 0 ? previousTeams : undefined}
           onStart={(teams, numberOfRounds) => {
+            setPreviousTeams([]);
             const nextSettings: GameSettings = {
               ...settings,
               numberOfRounds: numberOfRounds as "3" | "5" | "10" | "infinite",
@@ -270,7 +273,14 @@ export default function Game() {
           teams={gameState.teams}
           gameMode={gameState.gameMode}
           onPlayAgain={() => {
-            resetGame();
+            if (gameState.gameMode === "team" && gameState.teams) {
+              setPreviousTeams(gameState.teams);
+              const teamSettings: GameSettings = { ...settings, gameMode: "team" };
+              updateSettings(teamSettings);
+              startGame(undefined, teamSettings);
+            } else {
+              resetGame();
+            }
             playSound("start");
           }}
           onChangeSettings={() => {

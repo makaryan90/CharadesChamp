@@ -21,13 +21,19 @@ const TEAM_COLORS = [
 interface TeamSetupProps {
   onStart: (teams: Team[], numberOfRounds: string) => void;
   onBack: () => void;
+  initialTeams?: Team[];
 }
 
-export function TeamSetup({ onStart, onBack }: TeamSetupProps) {
-  const [teams, setTeams] = useState<Team[]>([
-    { name: "", score: 0, color: "purple" },
-    { name: "", score: 0, color: "cyan" },
-  ]);
+export function TeamSetup({ onStart, onBack, initialTeams }: TeamSetupProps) {
+  const [teams, setTeams] = useState<Team[]>(() => {
+    if (initialTeams && initialTeams.length > 0) {
+      return initialTeams.map(team => ({ ...team, score: 0 }));
+    }
+    return [
+      { name: "", score: 0, color: "purple" },
+      { name: "", score: 0, color: "cyan" },
+    ];
+  });
   const [numberOfRounds, setNumberOfRounds] = useState<string>("5");
 
   const addTeam = () => {
