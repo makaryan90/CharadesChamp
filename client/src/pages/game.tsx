@@ -14,6 +14,7 @@ import { useGameState } from "@/hooks/useGameState";
 import { useGameSettings } from "@/hooks/useGameSettings";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { saveGame } from "@/hooks/useSaveGame";
+import type { GameSettings } from "@shared/schema";
 
 type NavigationScreen = "main-menu" | "quick-start" | "how-to-play" | "subscribe";
 
@@ -115,8 +116,12 @@ export default function Game() {
           onQuickStart={() => setNavigationScreen("quick-start")}
           onCreateTeams={() => {
             setNavigationScreen(null);
-            const nextSettings = applySettings(prev => ({ ...prev, gameMode: "team" }));
-            startGame(undefined, nextSettings);
+            const teamSettings: GameSettings = {
+              ...settings,
+              gameMode: "team",
+            };
+            updateSettings(teamSettings);
+            startGame(undefined, teamSettings);
           }}
           onHowToPlay={() => setNavigationScreen("how-to-play")}
           onSettings={() => setShowSettings(true)}
@@ -175,12 +180,11 @@ export default function Game() {
       {gameState.status === "team-setup" && (
         <TeamSetup
           onStart={(teams, numberOfRounds) => {
-            // Apply settings synchronously and get the merged result
-            const nextSettings = applySettings(prev => ({ 
-              ...prev, 
-              numberOfRounds: numberOfRounds as "3" | "5" | "10" | "infinite"
-            }));
-            // Pass the synchronously computed settings to ensure persistence
+            const nextSettings: GameSettings = {
+              ...settings,
+              numberOfRounds: numberOfRounds as "3" | "5" | "10" | "infinite",
+            };
+            updateSettings(nextSettings);
             startWithTeams(teams, nextSettings);
           }}
           onBack={handleBackToMainMenu}

@@ -247,15 +247,8 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
   };
 
   const nextTeam = () => {
-    setGameState((prev) => {
-      if (!prev.teams || prev.teams.length === 0) return prev;
-      
-      const nextIndex = ((prev.currentTeamIndex || 0) + 1) % prev.teams.length;
-      return {
-        ...prev,
-        currentTeamIndex: nextIndex,
-      };
-    });
+    stopTimer();
+    setGameState((prev) => ({ ...prev, status: "round-end", timeRemaining: 0 }));
   };
 
   const pauseGame = () => {
