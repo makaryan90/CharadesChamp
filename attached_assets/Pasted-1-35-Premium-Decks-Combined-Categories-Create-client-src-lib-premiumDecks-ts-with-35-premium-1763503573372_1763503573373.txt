@@ -1,0 +1,45 @@
+1. 35 Premium Decks + Combined Categories
+   - Create client/src/lib/premiumDecks.ts with 35 premium packs (25–30 words each):  
+     Disney, Marvel Heroes, Harry Potter, Friends Quotes, The Office, TikTok Dances, Adult 18+, Christmas Songs, Halloween, 80s Movies, 90s Hits, Netflix Shows, Taylor Swift, Billie Eilish, Reality TV Stars, etc.
+   - Update client/src/lib/categories.ts → add premium: true to each premium deck
+   - Export const allCategories = [...originalFreeCategories, ...premiumDecks]
+
+2. Premium Hook
+   - Create client/src/lib/premium.ts → usePremium() hook with isPremium, unlockPremium(), and a "restore purchase" button
+
+3. Deck Shop Screen (this alone drives 70% of revenue)
+   - Create client/src/components/game/DeckShop.tsx
+   - Beautiful grid of ALL 44 categories (9 free + 35 premium)
+   - Show lock + "Premium" badge on locked ones
+   - Add "New" and "Popular" tags
+   - Click locked → open Paywall
+
+4. Gorgeous Paywall Modal
+   - Replace current fake modal with client/src/components/game/PaywallModal.tsx
+   - Three options: Lifetime $9.99 · Yearly $19.99 (Best Value) · Monthly $2.99
+   - "Unlock Now" simulates purchase (sets localStorage + confetti + thank you message)
+   - Add comment // TODO: RevenueCat integration here
+
+5. Hybrid Monetization (Web-Friendly Version)
+   - npm install @capacitor-community/admob && npm install canvas-confetti
+   - Create client/src/lib/ads.ts with:
+     • Mock rewarded ad → gives +10 seconds when time < 15s
+     • Mock interstitial on EndScreen → MainMenu (skipped if premium)
+   - Add "Watch Ad for +10 Sec" button in GamePlay when timer < 15s
+   - Add "Remove Ads Forever" in Paywall
+
+6. Viral Polish That Works Everywhere
+   - On correct guess: canvas-confetti explosion + strong haptic navigator.vibrate([200, 100, 200])
+   - Add "Go Premium" banner on MainMenu if not premium
+   - Add "More Decks →" button in MainMenu and CategorySelect
+
+7. Final Integration
+   - Update CategorySelect.tsx to use allCategories and show padlocks
+   - Update game logic to pull from allCategories (respect premium lock)
+   - When user tries to select locked category → auto-open PaywallModal
+
+Use shadcn/ui, Tailwind, Lucide icons. Make it look like a $10M app.
+
+Generate one file at a time and say “File created: client/src/...” after each. Do not attempt real video recording or native AdMob — we’ll add those after Capacitor conversion.
+
+This exact set of features has made multiple charades clones earn $3k–$15k/month.
