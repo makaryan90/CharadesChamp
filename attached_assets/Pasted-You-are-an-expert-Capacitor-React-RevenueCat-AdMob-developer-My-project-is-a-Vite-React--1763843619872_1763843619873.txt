@@ -1,0 +1,66 @@
+You are an expert Capacitor + React + RevenueCat + AdMob developer.
+
+My project is a Vite + React + TypeScript PWA at https://replit.com/@makaryan90/CharadesChamp and it already works perfectly.
+
+Goal: Convert it into fully native iOS & Android apps with REAL monetization (real money, real ads, real video recording) in one go.
+
+Do everything in exact order:
+
+1. Capacitor Setup
+   - npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios
+   - npx cap init "Charades Party!" com.charadesparty.app --web-dir=client/dist
+
+2. Vite → Capacitor Compatibility
+   - Update vite.config.ts → base: "/", outDir: "../client/dist"
+   - Ensure client/index.html is at project root for Capacitor
+
+3. Add Native Platforms
+   - npx cap add android
+   - npx cap add ios
+
+4. REAL RevenueCat Purchases (replace fake localStorage)
+   - npm install @revenuecat/purchases-capacitor
+   - Create client/src/lib/revenuecat.ts
+   - Initialize RevenueCat (leave placeholders for SDK keys)
+   - Create three REAL products:
+        • monthly → $3.99 / month   (product ID: charades_monthly)
+        • yearly   → $19.99 / year  (product ID: charades_yearly)  ← Best Value
+        • lifetime → $29.99 one-time (product ID: charades_lifetime)
+   - Replace every localStorage "charades-premium" check with real RevenueCat entitlement ("premium_access")
+   - Add "Restore Purchases" button in PaywallModal and Settings
+
+5. REAL AdMob (no more mocks)
+   - npm install @capacitor-community/admob
+   - Create client/src/lib/admob.ts
+   - Initialize with real AdMob app IDs (leave placeholders)
+   - Replace mock rewarded ad → real Rewarded Video (+10 seconds reward)
+   - Replace mock interstitial → real Interstitial on EndScreen → MainMenu (skipped if entitled)
+
+6. REAL Video Recording & Sharing (viral rocket fuel)
+   - Use Capacitor Camera + Screen Capture or MediaCapture plugin
+   - Add REC toggle in GamePlay top-right
+   - Record camera (front) + gameplay (PiP)
+   - Auto-stop at round end → save to device + open native share sheet
+
+7. Native Polish & Permissions
+   - Install @capacitor/haptics → stronger native vibrations
+   - Update capacitor.config.ts → app name, splash, icons, fullscreen
+   - Add required permissions (camera, microphone, storage) + usage descriptions in AndroidManifest.xml and Info.plist
+   - Add splash screen & app icons (512×512 and 1024×1024)
+
+8. Build Commands
+   - Add scripts to package.json:
+       "build:web": "vite build",
+       "build:android": "npm run build:web && npx cap copy android && npx cap open android",
+       "build:ios": "npm run build:web && npx cap copy ios && npx cap open ios"
+
+9. Final Touches
+   - Update PaywallModal to show correct pricing:
+        • Monthly $3.99
+        • Yearly $19.99 (Best Value badge, "60% OFF")
+        • Lifetime $29.99
+   - Keep all existing UI/UX (shadcn, Tailwind, Lucide, confetti, haptics)
+
+Use exactly the same code style. Generate files one by one and confirm after each.
+
+Start right now — finish the full native app with real $29.99 lifetime purchases and real AdMob today.

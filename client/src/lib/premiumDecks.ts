@@ -10,6 +10,11 @@ export const FREE_TRIAL_DECK: Category = {
   freeTrial: true,
   words: [
     "Renegade dance",
+    "Skibidi Toilet", 
+    "Hawk Tuah", 
+    "Very Demure", 
+    "Brat Summer Pose", 
+    "Ohio Rizz",
     "Savage Love dance",
     "Blinding Lights challenge",
     "WAP dance",
