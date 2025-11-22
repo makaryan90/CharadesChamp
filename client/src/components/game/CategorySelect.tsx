@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { allCategories } from "@/lib/categories";
 import { CategoryCard } from "./CategoryCard";
+import { isDeckUnlocked } from "@/lib/premium";
 
 interface CategorySelectProps {
   selectedCategories: string[];
@@ -52,7 +53,7 @@ export function CategorySelect({
       <div className="flex-1 max-w-4xl w-full mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
           {allCategories.map((category) => {
-            const isLocked = !isPremium && category.premium;
+            const isLocked = !isDeckUnlocked(category.id) && category.premium;
             return (
               <CategoryCard
                 key={category.id}

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { type GameState, type GameSettings } from "@shared/schema";
 import { allCategories } from "@/lib/categories";
+import { FREE_TRIAL_DECK } from "@/lib/premiumDecks";
+import { claimFreeTrial, hasClaimedFreeTrial } from "@/lib/premium";
 
 export function useGameState(settings: GameSettings, playSound: (sound: string) => void) {
   const latestSettingsRef = useRef<GameSettings>(settings);
@@ -275,7 +277,14 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
 
   const endGame = () => {
     stopTimer();
-    setGameState((prev) => ({ ...prev, status: "ended" }));
+    setGameState((prev) => {
+      // Auto-unlock free trial deck after first game with 10+ words
+      if (!hasClaimedFreeTrial() && prev.wordsGuessed.length >= 10) {
+        claimFreeTrial(FREE_TRIAL_DECK.id);
+      }
+      
+      return { ...prev, status: "ended" };
+    });
   };
 
   const resetGame = () => {

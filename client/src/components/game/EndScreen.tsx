@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, RotateCcw, Settings, Home } from "lucide-react";
+import { Trophy, RotateCcw, Settings, Home, Sparkles } from "lucide-react";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/useWindowSize";
+import { useState, useEffect } from "react";
+import { hasClaimedFreeTrial } from "@/lib/premium";
+import { FREE_TRIAL_DECK } from "@/lib/premiumDecks";
 
 interface Team {
   name: string;
@@ -22,8 +25,20 @@ interface EndScreenProps {
 
 export function EndScreen({ score, wordsGuessed, onPlayAgain, onChangeSettings, onMainMenu, teams, gameMode }: EndScreenProps) {
   const { width, height } = useWindowSize();
+  const [showTrialUnlock, setShowTrialUnlock] = useState(false);
   
   const sortedTeams = teams ? [...teams].sort((a, b) => b.score - a.score) : [];
+
+  // Check if user just unlocked free trial
+  useEffect(() => {
+    const justUnlocked = hasClaimedFreeTrial() && wordsGuessed.length >= 10;
+    const hasShownNotification = sessionStorage.getItem("trial-unlock-shown");
+    
+    if (justUnlocked && !hasShownNotification) {
+      setShowTrialUnlock(true);
+      sessionStorage.setItem("trial-unlock-shown", "true");
+    }
+  }, [wordsGuessed.length]);
 
   const getTeamColorDot = (color: string) => {
     const colorMap: Record<string, string> = {
@@ -47,6 +62,24 @@ export function EndScreen({ score, wordsGuessed, onPlayAgain, onChangeSettings, 
           numberOfPieces={500}
           gravity={0.3}
         />
+      )}
+
+      {/* Free Trial Unlock Notification */}
+      {showTrialUnlock && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="animate-in zoom-in-50 duration-700 bg-gradient-to-br from-purple-600 to-pink-600 text-white px-8 py-6 rounded-3xl shadow-2xl pointer-events-auto max-w-md mx-4">
+            <Sparkles className="h-10 w-10 mx-auto mb-3 animate-pulse" />
+            <p className="text-2xl font-bold text-center mb-2">🎉 You unlocked a FREE premium deck!</p>
+            <p className="text-center text-lg">{FREE_TRIAL_DECK.name} is now yours forever</p>
+            <button
+              onClick={() => setShowTrialUnlock(false)}
+              className="mt-4 w-full bg-white/20 hover:bg-white/30 rounded-full py-2 font-semibold transition-colors"
+              data-testid="button-dismiss-trial-unlock"
+            >
+              Awesome!
+            </button>
+          </div>
+        </div>
       )}
 
       <div className="text-center space-y-8 max-w-2xl w-full">

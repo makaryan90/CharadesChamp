@@ -1,7 +1,47 @@
 import { type Category } from "@shared/schema";
 
+// FREE TRIAL DECK - Unlocked after first game (10+ words guessed)
+export const FREE_TRIAL_DECK: Category = {
+  id: "tiktok-hits-2025",
+  name: "TikTok Hits 2025",
+  icon: "Music",
+  color: "text-purple-500",
+  premium: true,
+  freeTrial: true,
+  words: [
+    "Renegade dance",
+    "Savage Love dance",
+    "Blinding Lights challenge",
+    "WAP dance",
+    "Savage remix pose",
+    "Say So dance",
+    "Toosie Slide",
+    "Whip and Nae Nae",
+    "Cupid Shuffle",
+    "Git Up dance",
+    "Level Up challenge",
+    "In My Feelings challenge",
+    "Old Town Road horse dance",
+    "Floss dance",
+    "Orange Justice",
+    "Default dance Fortnite",
+    "Hype dance",
+    "Take the L",
+    "Best Mate",
+    "Hootenanny",
+    "Electro Shuffle",
+    "Wiggle",
+    "Running Man",
+    "Shoot dance",
+    "Milky Way",
+    "Dab",
+    "Hit the Quan",
+  ],
+};
+
 // 35 Premium Category Packs - Each with 25-30 carefully curated words
 export const premiumDecks: Category[] = [
+  FREE_TRIAL_DECK,
   {
     id: "disney",
     name: "Disney Characters",

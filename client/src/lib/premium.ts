@@ -1,6 +1,26 @@
 import { useState, useEffect } from "react";
 
 const PREMIUM_STORAGE_KEY = "charades-premium";
+const FREE_TRIAL_CLAIMED_KEY = "free-trial-claimed";
+const UNLOCKED_TRIAL_DECK_KEY = "unlocked-trial-deck";
+
+export const isDeckUnlocked = (deckId: string): boolean => {
+  if (typeof window === "undefined") return false;
+  if (localStorage.getItem(PREMIUM_STORAGE_KEY) === "true") return true;
+  if (localStorage.getItem(UNLOCKED_TRIAL_DECK_KEY) === deckId) return true;
+  return false;
+};
+
+export const hasClaimedFreeTrial = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(FREE_TRIAL_CLAIMED_KEY) === "true";
+};
+
+export const claimFreeTrial = (deckId: string): void => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(FREE_TRIAL_CLAIMED_KEY, "true");
+  localStorage.setItem(UNLOCKED_TRIAL_DECK_KEY, deckId);
+};
 
 export function usePremium() {
   const [isPremium, setIsPremium] = useState<boolean>(() => {

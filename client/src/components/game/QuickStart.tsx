@@ -5,6 +5,7 @@ import { Lock, ArrowLeft, Play } from "lucide-react";
 import { allCategories } from "@/lib/categories";
 import { getIcon } from "@/lib/iconMap";
 import { useState } from "react";
+import { isDeckUnlocked } from "@/lib/premium";
 
 interface QuickStartProps {
   onBack: () => void;
@@ -15,8 +16,8 @@ interface QuickStartProps {
 
 export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium = false }: QuickStartProps) {
   const freeCategories = allCategories.filter(c => !c.premium);
-  const premiumCategories = isPremium ? [] : allCategories.filter(c => c.premium);
-  const allAvailableCategories = isPremium ? allCategories : freeCategories;
+  const lockedPremiumCategories = allCategories.filter(c => c.premium && !isDeckUnlocked(c.id));
+  const unlockedCategories = allCategories.filter(c => !c.premium || isDeckUnlocked(c.id));
   
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [timerLength, setTimerLength] = useState<string>("60");
@@ -55,7 +56,7 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
           <h3 className="text-lg font-semibold text-foreground">Choose Categories</h3>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {allAvailableCategories.map((category) => {
+            {unlockedCategories.map((category) => {
               const isSelected = selectedCategories.includes(category.id);
               return (
                 <Card
@@ -71,14 +72,13 @@ export function QuickStart({ onBack, onStartGame, onOpenSubscription, isPremium 
                       {getIcon(category.icon, "h-10 w-10")}
                     </div>
                     <span className="text-sm font-semibold">{category.name}</span>
-                    {category.premium && <Badge variant="secondary" className="text-xs">Premium</Badge>}
-                    {!category.premium && !isPremium && <Badge variant="secondary" className="text-xs">Free</Badge>}
+                    {!category.premium && <Badge variant="secondary" className="text-xs">Free</Badge>}
                   </div>
                 </Card>
               );
             })}
 
-            {premiumCategories.slice(0, 6).map((category) => (
+            {lockedPremiumCategories.slice(0, 6).map((category) => (
               <Card
                 key={category.id}
                 className="p-4 opacity-60 cursor-pointer relative overflow-hidden hover-elevate"

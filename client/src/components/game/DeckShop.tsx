@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CategoryCard } from "./CategoryCard";
 import { allCategories } from "@/lib/categories";
 import { Badge } from "@/components/ui/badge";
+import { isDeckUnlocked } from "@/lib/premium";
 
 interface DeckShopProps {
   onBack: () => void;
@@ -141,7 +142,7 @@ export function DeckShop({
       <div className="flex-1 max-w-6xl w-full mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-8">
           {filteredCategories.map((category) => {
-            const isLocked = !isPremium && category.premium;
+            const isLocked = !isDeckUnlocked(category.id) && category.premium;
             const isNew = newDeckIds.includes(category.id);
             const isPopular = popularDeckIds.includes(category.id);
             const isSelected = selectedCategories.includes(category.id);
