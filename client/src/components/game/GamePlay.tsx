@@ -162,7 +162,10 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
 
       {gameState.gameMode === "team" && currentTeam && (
         <div className="mb-6 text-center">
-          <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full ${getTeamColorClasses(currentTeam.color).bg} border-2 ${getTeamColorClasses(currentTeam.color).border}`}>
+          <div 
+            key={currentTeam.name + currentTeam.score}
+            className={`inline-flex animate-in fade-in slide-in-from-bottom-2 duration-500 items-center gap-2 px-6 py-3 rounded-full ${getTeamColorClasses(currentTeam.color).bg} border-2 ${getTeamColorClasses(currentTeam.color).border}`}
+          >
             <div className={`w-3 h-3 rounded-full ${getTeamColorClasses(currentTeam.color).dot}`} />
             <span className="font-bold text-lg" data-testid="text-current-team">
               {currentTeam.name}'s Turn
