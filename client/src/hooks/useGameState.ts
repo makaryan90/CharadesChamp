@@ -232,13 +232,18 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
         const nextIndex = (currentIndex + 1) % prev.teams.length;
         const isMovingToNextRound = nextIndex === 0;
 
-        return {
-          ...prev,
-          status: "playing",
-          timeRemaining: parseInt(latestSettingsRef.current.timerLength),
-          currentTeamIndex: nextIndex,
-          currentRound: isMovingToNextRound ? prev.currentRound + 1 : prev.currentRound,
-        };
+        // Force React to re-render the team display properly
+        setTimeout(() => {
+          setGameState({
+            ...prev,
+            status: "playing",
+            timeRemaining: parseInt(latestSettingsRef.current.timerLength),
+            currentTeamIndex: nextIndex,
+            currentRound: isMovingToNextRound ? prev.currentRound + 1 : prev.currentRound,
+          });
+        }, 50);
+
+        return prev; // temporary state to avoid flash
       } else {
         // Solo mode - just increment round
         return {
@@ -297,7 +302,7 @@ export function useGameState(settings: GameSettings, playSound: (sound: string) 
   const addTime = (seconds: number) => {
     setGameState((prev) => ({
       ...prev,
-      timeRemaining: prev.timeRemaining + seconds,
+      timeRemaining: Math.min(prev.timeRemaining + seconds, parseInt(latestSettingsRef.current.timerLength)),
     }));
   };
 

@@ -37,6 +37,7 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
   const [showWord, setShowWord] = useState(true);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [isWatchingAd, setIsWatchingAd] = useState(false);
+  const [isAdPlaying, setIsAdPlaying] = useState(false);
   const category = allCategories.find((c) => c.id === gameState.currentCategory);
 
   const handleCorrect = () => {
@@ -56,21 +57,6 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
     onCorrect();
   };
 
-  const handleWatchAd = async () => {
-    setIsWatchingAd(true);
-    const result = await showRewardedAd();
-    
-    if (result.success && result.reward && onAddTime) {
-      onAddTime(result.reward);
-      
-      // Show success feedback
-      if (navigator.vibrate) {
-        navigator.vibrate(100);
-      }
-    }
-    
-    setIsWatchingAd(false);
-  };
 
   useSwipeGesture({
     onSwipeUp: !isPaused ? onSkip : undefined,
@@ -238,26 +224,33 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
               Skip
             </Button>
 
-            {!isPremium && gameState.timeRemaining < 15 && onAddTime && (
+            {!isPremium && gameState.timeRemaining < 15 && gameState.timeRemaining > 0 && onAddTime && (
               <Button
                 size="lg"
-                variant="outline"
-                className="w-full max-w-md mx-auto h-16 text-xl font-semibold rounded-full border-2 border-primary text-primary hover:bg-primary/10"
-                onClick={handleWatchAd}
-                disabled={isWatchingAd}
+                variant="secondary"
+                disabled={isAdPlaying || isWatchingAd}
+                className="w-full max-w-md mx-auto h-14 text-lg font-semibold rounded-full mt-4 opacity-90"
+                onClick={async () => {
+                  if (isAdPlaying || isWatchingAd) return;
+                  setIsAdPlaying(true);
+                  setIsWatchingAd(true);
+                  
+                  const result = await showRewardedAd();
+                  
+                  if (result.success && result.reward && onAddTime) {
+                    onAddTime(result.reward);
+                    
+                    if (navigator.vibrate) {
+                      navigator.vibrate(100);
+                    }
+                  }
+                  
+                  setIsAdPlaying(false);
+                  setIsWatchingAd(false);
+                }}
                 data-testid="button-watch-ad"
               >
-                {isWatchingAd ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin mr-2" />
-                    Loading Ad...
-                  </>
-                ) : (
-                  <>
-                    <Tv className="h-6 w-6 mr-2" />
-                    Watch Ad for +10 Sec
-                  </>
-                )}
+                {isAdPlaying || isWatchingAd ? "Loading Ad..." : "Watch Ad for +10 Sec"}
               </Button>
             )}
 

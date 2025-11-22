@@ -37,6 +37,19 @@ export function DeckShop({
 
   return (
     <div className="min-h-screen flex flex-col p-6 md:p-8">
+      {/* Fixed Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onBack}
+          className="bg-background/80 backdrop-blur-sm rounded-full shadow-lg"
+          data-testid="button-back-fixed"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </Button>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <Button
