@@ -15,7 +15,8 @@
 
 import { Camera } from "@capacitor/camera";
 import { Share } from "@capacitor/share";
-import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
+// Note: Filesystem import only available on native platforms
+// import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 
 let isRecording = false;
 let recordingStartTime: number | null = null;
