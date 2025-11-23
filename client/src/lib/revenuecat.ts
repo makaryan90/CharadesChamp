@@ -1,8 +1,7 @@
-import * as Purchases from "@revenuecat/purchases-capacitor";
 import { Capacitor } from "@capacitor/core";
 
-// PLACEHOLDER keys - you'll get real ones from RevenueCat later
-// For now, these are just placeholders and won't work in production
+// PLACEHOLDER keys - Replace with YOUR keys from RevenueCat dashboard
+// ← REPLACE WITH YOUR REAL KEY HERE (from https://dashboard.revenuecat.com)
 const REVENUECAT_API_KEY_ANDROID = "goog_YOUR_ANDROID_KEY_HERE";
 const REVENUECAT_API_KEY_IOS = "appl_YOUR_IOS_KEY_HERE";
 
@@ -17,19 +16,46 @@ export const PRODUCT_IDS = {
 export const ENTITLEMENT_ID = "premium_access";
 
 let isInitialized = false;
+let Purchases: any = null;
+
+// Dynamically import RevenueCat only on native platforms
+async function getPurchasesModule() {
+  if (Purchases) return Purchases;
+
+  const platform = Capacitor.getPlatform();
+  // Only import on native platforms (ios, android)
+  if (platform === "ios" || platform === "android") {
+    try {
+      Purchases = await import("@revenuecat/purchases-capacitor");
+      return Purchases;
+    } catch (e) {
+      console.log("⚠️ RevenueCat not available on this platform");
+      return null;
+    }
+  }
+  return null;
+}
 
 export async function initRevenueCat() {
   if (isInitialized) return;
 
   try {
+    const Purchases = await getPurchasesModule();
+    if (!Purchases) {
+      console.log("ℹ️ RevenueCat: Web environment - using trial deck only");
+      isInitialized = true;
+      return;
+    }
+
     const platform = Capacitor.getPlatform();
     const apiKey =
       platform === "ios" ? REVENUECAT_API_KEY_IOS : REVENUECAT_API_KEY_ANDROID;
 
-    await Purchases.setDebugLogsEnabled({ enabled: true });
-    await Purchases.configure({
+    // Configure RevenueCat
+    await (Purchases as any).Purchases.setDebugLogsEnabled({ enabled: true });
+    await (Purchases as any).Purchases.configure({
       apiKey,
-      appUserID: undefined, // RevenueCat generates unique ID automatically
+      appUserID: undefined,
     });
 
     isInitialized = true;
@@ -41,7 +67,10 @@ export async function initRevenueCat() {
 
 export async function getProducts() {
   try {
-    const offerings = await Purchases.getOfferings();
+    const Purchases = await getPurchasesModule();
+    if (!Purchases) return [];
+
+    const offerings = await (Purchases as any).Purchases.getOfferings();
     return offerings.current?.availablePackages || [];
   } catch (error) {
     console.error("❌ Failed to fetch products:", error);
@@ -51,14 +80,19 @@ export async function getProducts() {
 
 export async function purchaseProduct(productId: string) {
   try {
-    const packages = await Purchases.getOfferings();
+    const Purchases = await getPurchasesModule();
+    if (!Purchases) throw new Error("RevenueCat not available");
+
+    const packages = await (Purchases as any).Purchases.getOfferings();
     const pkg = packages.current?.availablePackages.find(
-      (p) => p.identifier === productId,
+      (p: any) => p.identifier === productId,
     );
 
     if (!pkg) throw new Error("Product not found");
 
-    const result = await Purchases.purchasePackage({ aPackage: pkg });
+    const result = await (Purchases as any).Purchases.purchasePackage({
+      aPackage: pkg,
+    });
     return result;
   } catch (error) {
     console.error("❌ Purchase failed:", error);
@@ -68,7 +102,13 @@ export async function purchaseProduct(productId: string) {
 
 export async function isPremium() {
   try {
-    const customerInfo = await Purchases.getCustomerInfo();
+    const Purchases = await getPurchasesModule();
+    if (!Purchases) {
+      // Web environment - only check trial deck
+      return false;
+    }
+
+    const customerInfo = await (Purchases as any).Purchases.getCustomerInfo();
     return !!customerInfo.entitlements.active[ENTITLEMENT_ID];
   } catch (error) {
     console.error("❌ Failed to check premium status:", error);
@@ -78,7 +118,10 @@ export async function isPremium() {
 
 export async function restorePurchases() {
   try {
-    await Purchases.restorePurchases();
+    const Purchases = await getPurchasesModule();
+    if (!Purchases) throw new Error("RevenueCat not available");
+
+    await (Purchases as any).Purchases.restorePurchases();
     return await isPremium();
   } catch (error) {
     console.error("❌ Restore failed:", error);

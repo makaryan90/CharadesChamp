@@ -59,7 +59,7 @@ export function PaywallModal({ isOpen, onClose, onUnlock }: PaywallModalProps) {
     {
       id: "monthly" as PricingTier,
       name: "Monthly",
-      price: "$2.99",
+      price: "$3.99",
       period: "/month",
       badge: null,
       savings: null,
@@ -70,12 +70,12 @@ export function PaywallModal({ isOpen, onClose, onUnlock }: PaywallModalProps) {
       price: "$19.99",
       period: "/year",
       badge: "Best Value",
-      savings: "Save 44%",
+      savings: "Save 60%",
     },
     {
       id: "lifetime" as PricingTier,
       name: "Lifetime",
-      price: "$9.99",
+      price: "$29.99",
       period: "once",
       badge: "Most Popular",
       savings: null,
