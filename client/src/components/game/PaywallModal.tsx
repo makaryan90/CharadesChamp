@@ -7,13 +7,15 @@ interface PaywallModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUnlock: () => void;
+  onRestorePurchases?: () => Promise<void>;
 }
 
 type PricingTier = "monthly" | "yearly" | "lifetime";
 
-export function PaywallModal({ isOpen, onClose, onUnlock }: PaywallModalProps) {
+export function PaywallModal({ isOpen, onClose, onUnlock, onRestorePurchases }: PaywallModalProps) {
   const [selectedTier, setSelectedTier] = useState<PricingTier>("yearly");
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
 
   if (!isOpen) return null;
@@ -235,6 +237,30 @@ export function PaywallModal({ isOpen, onClose, onUnlock }: PaywallModalProps) {
                 Unlock Now - {pricingTiers.find((t) => t.id === selectedTier)?.price}
               </div>
             )}
+          </Button>
+
+          {/* Restore Purchases Button */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="w-full text-sm"
+            onClick={async () => {
+              if (onRestorePurchases) {
+                setIsRestoring(true);
+                try {
+                  await onRestorePurchases();
+                  console.log("✅ Purchases restored");
+                } catch (error) {
+                  console.error("❌ Restore failed:", error);
+                } finally {
+                  setIsRestoring(false);
+                }
+              }
+            }}
+            disabled={isRestoring}
+            data-testid="button-restore-purchases"
+          >
+            {isRestoring ? "Restoring..." : "Restore Purchases"}
           </Button>
 
           {/* Footer */}

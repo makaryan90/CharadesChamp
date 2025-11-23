@@ -6,6 +6,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { useState, useEffect } from "react";
 import { hasClaimedFreeTrial } from "@/lib/premium";
 import { FREE_TRIAL_DECK } from "@/lib/premiumDecks";
+import { showInterstitialAd } from "@/lib/admob";
 
 interface Team {
   name: string;
@@ -191,7 +192,11 @@ export function EndScreen({ score, wordsGuessed, onPlayAgain, onChangeSettings, 
             size="lg"
             variant="outline"
             className="w-64 h-16 text-xl font-semibold rounded-full"
-            onClick={onMainMenu}
+            onClick={async () => {
+              // Show interstitial ad before returning to main menu
+              await showInterstitialAd();
+              onMainMenu();
+            }}
             data-testid="button-main-menu"
           >
             <Home className="h-6 w-6 mr-2" />
