@@ -1,3 +1,4 @@
+import { useAdMob } from "@/hooks/useAdMob";
 import { useState, useEffect } from "react";
 import { MainMenu } from "@/components/game/MainMenu";
 import { QuickStart } from "@/components/game/QuickStart";
@@ -30,6 +31,7 @@ export default function Game() {
   const [previousTeams, setPreviousTeams] = useState<Array<{ name: string; score: number; color: string }>>([]);
 
   const { settings, updateSettings, applySettings } = useGameSettings();
+  const { showInterstitial } = useAdMob();
   const { playSound } = useSoundEffects(settings.soundEnabled);
   const {
     gameState,

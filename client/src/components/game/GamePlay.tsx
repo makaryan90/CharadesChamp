@@ -1,3 +1,4 @@
+import { triggerHaptic } from "@/lib/haptics";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pause, Play, ChevronRight, Check, X, Tv } from "lucide-react";
@@ -33,12 +34,24 @@ interface GamePlayProps {
   isPremium?: boolean;
 }
 
-export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNextTeam, isPaused = false, onAddTime, isPremium = false }: GamePlayProps) {
+export function GamePlay({
+  gameState,
+  onCorrect,
+  onSkip,
+  onPause,
+  onExit,
+  onNextTeam,
+  isPaused = false,
+  onAddTime,
+  isPremium = false,
+}: GamePlayProps) {
   const [showWord, setShowWord] = useState(true);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [isWatchingAd, setIsWatchingAd] = useState(false);
   const [isAdPlaying, setIsAdPlaying] = useState(false);
-  const category = allCategories.find((c) => c.id === gameState.currentCategory);
+  const category = allCategories.find(
+    (c) => c.id === gameState.currentCategory,
+  );
 
   const handleCorrect = () => {
     // Trigger confetti explosion
@@ -50,13 +63,10 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
     });
 
     // Enhanced haptic feedback
-    if (navigator.vibrate) {
-      navigator.vibrate([200, 100, 200]);
-    }
+    triggerHaptic("heavy");
 
     onCorrect();
   };
-
 
   useSwipeGesture({
     onSwipeUp: !isPaused ? onSkip : undefined,
@@ -70,24 +80,54 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
     }
   }, [gameState.currentWord, isPaused]);
 
-  const currentTeam = gameState.teams && gameState.teams.length > 0 
-    ? gameState.teams[gameState.currentTeamIndex || 0] 
-    : null;
+  const currentTeam =
+    gameState.teams && gameState.teams.length > 0
+      ? gameState.teams[gameState.currentTeamIndex || 0]
+      : null;
 
   const getTeamColorClasses = (color: string) => {
-    const colorMap: Record<string, { bg: string, border: string, dot: string }> = {
-      purple: { bg: "bg-purple-500/20", border: "border-purple-500", dot: "bg-purple-500" },
-      cyan: { bg: "bg-cyan-500/20", border: "border-cyan-500", dot: "bg-cyan-500" },
-      orange: { bg: "bg-orange-500/20", border: "border-orange-500", dot: "bg-orange-500" },
-      green: { bg: "bg-green-500/20", border: "border-green-500", dot: "bg-green-500" },
-      pink: { bg: "bg-pink-500/20", border: "border-pink-500", dot: "bg-pink-500" },
-      yellow: { bg: "bg-yellow-500/20", border: "border-yellow-500", dot: "bg-yellow-500" },
+    const colorMap: Record<
+      string,
+      { bg: string; border: string; dot: string }
+    > = {
+      purple: {
+        bg: "bg-purple-500/20",
+        border: "border-purple-500",
+        dot: "bg-purple-500",
+      },
+      cyan: {
+        bg: "bg-cyan-500/20",
+        border: "border-cyan-500",
+        dot: "bg-cyan-500",
+      },
+      orange: {
+        bg: "bg-orange-500/20",
+        border: "border-orange-500",
+        dot: "bg-orange-500",
+      },
+      green: {
+        bg: "bg-green-500/20",
+        border: "border-green-500",
+        dot: "bg-green-500",
+      },
+      pink: {
+        bg: "bg-pink-500/20",
+        border: "border-pink-500",
+        dot: "bg-pink-500",
+      },
+      yellow: {
+        bg: "bg-yellow-500/20",
+        border: "border-yellow-500",
+        dot: "bg-yellow-500",
+      },
     };
     return colorMap[color] || colorMap.purple;
   };
 
   // FIX: Calculate total time from gameState instead of reading from localStorage
-  const totalTime = gameState.timeRemaining + (gameState.totalRounds ? gameState.currentRound * 60 : 0);
+  const totalTime =
+    gameState.timeRemaining +
+    (gameState.totalRounds ? gameState.currentRound * 60 : 0);
   // Better approach: pass totalTime through gameState or use a standard value
   // For now, we'll assume the timer was set to one of the standard values
   const timerOptions = [30, 60, 90];
@@ -103,7 +143,11 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
             onClick={onPause}
             data-testid="button-pause"
           >
-            {isPaused ? <Play className="h-6 w-6" /> : <Pause className="h-6 w-6" />}
+            {isPaused ? (
+              <Play className="h-6 w-6" />
+            ) : (
+              <Pause className="h-6 w-6" />
+            )}
           </Button>
           <Button
             size="icon"
@@ -120,7 +164,13 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
           totalTime={estimatedTotalTime}
         />
 
-        <ScoreDisplay score={gameState.gameMode === "team" && currentTeam ? currentTeam.score : gameState.score} />
+        <ScoreDisplay
+          score={
+            gameState.gameMode === "team" && currentTeam
+              ? currentTeam.score
+              : gameState.score
+          }
+        />
       </div>
 
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
@@ -128,11 +178,14 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
           <AlertDialogHeader>
             <AlertDialogTitle>Exit Game?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to exit the current game? Your progress will be saved and you'll see the game summary.
+              Are you sure you want to exit the current game? Your progress will
+              be saved and you'll see the game summary.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-exit">Cancel</AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-exit">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 setShowExitDialog(false);
@@ -148,11 +201,13 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
 
       {gameState.gameMode === "team" && currentTeam && (
         <div className="mb-6 text-center">
-          <div 
+          <div
             key={currentTeam.name + currentTeam.score}
             className={`inline-flex animate-in fade-in slide-in-from-bottom-2 duration-500 items-center gap-2 px-6 py-3 rounded-full ${getTeamColorClasses(currentTeam.color).bg} border-2 ${getTeamColorClasses(currentTeam.color).border}`}
           >
-            <div className={`w-3 h-3 rounded-full ${getTeamColorClasses(currentTeam.color).dot}`} />
+            <div
+              className={`w-3 h-3 rounded-full ${getTeamColorClasses(currentTeam.color).dot}`}
+            />
             <span className="font-bold text-lg" data-testid="text-current-team">
               {currentTeam.name}'s Turn
             </span>
@@ -224,48 +279,53 @@ export function GamePlay({ gameState, onCorrect, onSkip, onPause, onExit, onNext
               Skip
             </Button>
 
-            {!isPremium && gameState.timeRemaining < 15 && gameState.timeRemaining > 0 && onAddTime && (
-              <Button
-                size="lg"
-                variant="secondary"
-                disabled={isAdPlaying || isWatchingAd}
-                className="w-full max-w-md mx-auto h-14 text-lg font-semibold rounded-full mt-4 opacity-90"
-                onClick={async () => {
-                  if (isAdPlaying || isWatchingAd) return;
-                  setIsAdPlaying(true);
-                  setIsWatchingAd(true);
-                  
-                  const result = await showRewardedAd();
-                  
-                  if (result.success && result.reward && onAddTime) {
-                    onAddTime(result.reward);
-                    
-                    if (navigator.vibrate) {
-                      navigator.vibrate(100);
-                    }
-                  }
-                  
-                  setIsAdPlaying(false);
-                  setIsWatchingAd(false);
-                }}
-                data-testid="button-watch-ad"
-              >
-                {isAdPlaying || isWatchingAd ? "Loading Ad..." : "Watch Ad for +10 Sec"}
-              </Button>
-            )}
+            {!isPremium &&
+              gameState.timeRemaining < 15 &&
+              gameState.timeRemaining > 0 &&
+              onAddTime && (
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  disabled={isAdPlaying || isWatchingAd}
+                  className="w-full max-w-md mx-auto h-14 text-lg font-semibold rounded-full mt-4 opacity-90"
+                  onClick={async () => {
+                    if (isAdPlaying || isWatchingAd) return;
+                    setIsAdPlaying(true);
+                    setIsWatchingAd(true);
 
-            {gameState.gameMode === "team" && onNextTeam && gameState.teams && gameState.teams.length > 1 && (
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full max-w-md mx-auto h-16 text-xl font-semibold rounded-full mt-4"
-                onClick={onNextTeam}
-                data-testid="button-next-team"
-              >
-                <ChevronRight className="h-6 w-6 mr-2" />
-                Pass to Next Team
-              </Button>
-            )}
+                    const result = await showRewardedAd();
+
+                    if (result.success && result.reward && onAddTime) {
+                      onAddTime(result.reward);
+                      triggerHaptic("light");
+                    }
+
+                    setIsAdPlaying(false);
+                    setIsWatchingAd(false);
+                  }}
+                  data-testid="button-watch-ad"
+                >
+                  {isAdPlaying || isWatchingAd
+                    ? "Loading Ad..."
+                    : "Watch Ad for +10 Sec"}
+                </Button>
+              )}
+
+            {gameState.gameMode === "team" &&
+              onNextTeam &&
+              gameState.teams &&
+              gameState.teams.length > 1 && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full max-w-md mx-auto h-16 text-xl font-semibold rounded-full mt-4"
+                  onClick={onNextTeam}
+                  data-testid="button-next-team"
+                >
+                  <ChevronRight className="h-6 w-6 mr-2" />
+                  Pass to Next Team
+                </Button>
+              )}
 
             <p className="text-center text-sm text-muted-foreground mt-2">
               Tip: Swipe up to skip, swipe right for correct
